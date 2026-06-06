@@ -4,19 +4,11 @@ import { CRUDModalTemplate } from "../../../components/template/CRUDModal";
 import Loading from "../../../components/common/loading/Loading";
 import { FormInput } from "../../../components/common/form/FormInput";
 import { ActionConfirmModal } from "../../../components/template/ActionConfirmModal";
+import type { MockUser } from "../../../models/MockUser.model";
+import { USERS } from "../../../mocks/users";
+const data = USERS
 
-type typeData = {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-};
-
-const data: typeData[] = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@example.com', role: 'Admin' },
-  { id: 2, name: 'Trần Thị B', email: 'tranthib@example.com', role: 'User' },
-]
-const columns: Column<typeData>[] = [
+const columns: Column<MockUser>[] = [
   {
     header: 'ID',
     accessor: 'id',
@@ -72,8 +64,8 @@ const UsersPage = () => {
             key: "role",
             label: "Vai trò",
             options: [
-              { value: "Admin", label: "Admin" },
-              { value: "User", label: "User" },
+              { value: "ADMIN", label: "Admin" },
+              { value: "USER", label: "User" },
             ],
           },
           
