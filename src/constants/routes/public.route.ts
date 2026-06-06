@@ -7,3 +7,4 @@ export const PUBLIC_ROUTE ={
     CONTACT: '/contact',
     PRICING: '/pricing',
 }
+

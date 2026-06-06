@@ -42,7 +42,7 @@ const Header: React.FC = () => {
       className={`sticky top-0 z-50 w-full transition-all duration-300 ease-in-out ${
         scrolled
           ? "bg-white/90 backdrop-blur-md shadow-md py-2"
-          : "bg-white py-5"
+          : " py-5"
       }`}
     >
       <div className="px-10 mx-auto flex items-center justify-between h-12">
@@ -53,7 +53,7 @@ const Header: React.FC = () => {
           </div>
           <div className="flex flex-col">
             <span className={`text-xl font-black tracking-wider transition-colors duration-300 ${
-              scrolled ? "text-gray-900" : "text-emerald-600"
+              scrolled ? "text-primary" : "text-emerald-600"
             }`}>
               GeneFit
             </span>
@@ -101,7 +101,7 @@ const Header: React.FC = () => {
             Đăng nhập
           </button>
           
-          <button className="px-5 py-2 text-sm font-semibold bg-emerald-500 text-white rounded-full shadow-sm hover:bg-emerald-600 hover:shadow-emerald-200 hover:shadow-lg transition-all duration-300 cursor-pointer">
+          <button className="px-5 py-2 text-sm font-semibold bg-primary text-white rounded-full shadow-sm hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer">
             Bắt đầu
           </button>
         </div>
