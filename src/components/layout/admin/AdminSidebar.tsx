@@ -3,6 +3,7 @@ import {ChevronDown, LayoutDashboard, LogOut, Settings, Users} from 'lucide-reac
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ADMIN_ROUTE } from '../../../constants/routes/admin.route';
+import { useAuthStore } from '../../../stores/auth.store';
 
 
 interface NavItem  {
@@ -55,6 +56,11 @@ const AdminSidebar = () => {
   }
 
   const isActive = (path: string) => pathname.pathname === path;
+
+  const handleLogout = () => {
+    useAuthStore.getState().logout();
+
+  }
 
   return (
     <div className="flex flex-col h-full overflow-auto border-r border-primary rounded-r-2xl shadow-primary-lg">
@@ -162,7 +168,9 @@ const AdminSidebar = () => {
             <span>{item.label}</span>
           </div>
         ))}
-        <button className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer text-error">
+        <button className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer text-error"
+          onClick={handleLogout}
+        >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
         </button>
