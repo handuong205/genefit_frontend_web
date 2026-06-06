@@ -1,0 +1,10 @@
+export const SESSION_STORAGE = {
+  ACCESS_TOKEN: "ACCESS_TOKEN",
+  RESET_TOKEN: "RESET_TOKEN",
+  REFRESH_TOKEN: "REFRESH_TOKEN",
+  ACCOUNT_CMS: "ACCOUNT_CMS",
+  USER: "USER",
+} as const;
+
+export type SessionStorageKey =
+  (typeof SESSION_STORAGE)[keyof typeof SESSION_STORAGE];
