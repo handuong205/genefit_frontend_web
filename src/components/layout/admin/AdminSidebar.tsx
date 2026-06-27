@@ -1,5 +1,5 @@
 
-import {ChevronDown, LayoutDashboard, LogOut, Settings, Users} from 'lucide-react'
+import {Broccoli, ChevronDown, LayoutDashboard, LogOut, PiggyBank, Settings, Users} from 'lucide-react'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ADMIN_ROUTE } from '../../../constants/routes/admin.route';
@@ -30,7 +30,17 @@ const Items: NavItem[] = [
         path: ADMIN_ROUTE.USERS,
         icon: <Users className="w-4 h-4" />,
       },
-    ]
+    ],
+  },
+  {
+    label: "Foods",
+    path: ADMIN_ROUTE.FOODS,
+    icon: <Broccoli className="w-5 h-5" />,
+  },
+  {
+    label: "Subscriptions",
+    path: ADMIN_ROUTE.SUBSCRIPTIONS,
+    icon: <PiggyBank className="w-5 h-5" />,
   }
 ];
 
@@ -40,6 +50,7 @@ const bottomNavItems: NavItem[] = [
     path: ADMIN_ROUTE.SETTINGS,
     icon: <Settings className="w-5 h-5" />,
   },
+  
 ]
 
 

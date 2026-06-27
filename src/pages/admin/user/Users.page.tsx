@@ -13,7 +13,7 @@ const columns: Column<MockUser>[] = [
     header: 'ID',
     accessor: 'id',
     sortable: true,
-    className: ' text-center',
+    className: 'text-center',
   },
   {
     header: 'Name',
@@ -23,7 +23,6 @@ const columns: Column<MockUser>[] = [
   {
     header: 'Email',
     accessor: 'email',
-    
   },
   {
     header: 'Role',
@@ -50,10 +49,11 @@ const UsersPage = () => {
 
   return (
     <>
-      <CRUDPageTemplate
+      <CRUDPageTemplate<MockUser>
         title="Quản lý người dùng"
         columns={columns}
         data={data}
+        rowKey="id"
         onAdd={handleCreateOpen}
         onEdit={(item) => console.log("Edit user", item)}
         onDelete={handleConfirm}
@@ -111,7 +111,7 @@ const UsersPage = () => {
           onConfirm={() => {
             // Logic for confirming delete action
           }}
-          type="delete"
+          type="delete" 
           message="xóa"
         />
       ) : null}

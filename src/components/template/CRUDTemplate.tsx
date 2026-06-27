@@ -13,7 +13,7 @@ import {
   Eye,
   RotateCw,
 } from "lucide-react";
-
+import CustomSelect from "../common/dropdown/CustomSelect";
 
 // --- Types ---
 export interface Column<T> {
@@ -40,6 +40,7 @@ export interface CRUDPageTemplateProps<T> {
   title: React.ReactNode;
   data: T[];
   columns: Column<T>[];
+  rowKey: keyof T;
   selectedRowId?: string | number;
   onRowClick?: (item: T) => void;
   pageSize?: number;
@@ -60,15 +61,21 @@ export interface CRUDPageTemplateProps<T> {
   statusField?: keyof T;
   onStatusChange?: (item: T, newStatus: boolean) => void;
 
-
   searchKeys?: (keyof T)[];
   searchRight?: React.ReactNode;
-  searchContent?: React.ReactNode;
+  searchContent?: (
+    searchData: Record<string, any>,
+    setSearchData: React.Dispatch<React.SetStateAction<Record<string, any>>>,
+  ) => React.ReactNode;
+
+  onSearch?: (
+    term: string,
+    filters?: Partial<Record<keyof T, string>>,
+    searchData?: Record<string, any>,
+  ) => void;
   headerRight?: React.ReactNode;
   filters?: FilterConfig<T>[];
   onRefresh?: () => void;
-
-  onSearch?: (term: string, filters?: Partial<Record<keyof T, string>>) => void;
 
   isTableLoading?: boolean;
 }
@@ -102,12 +109,11 @@ const ToggleSwitch = ({
 );
 
 // --- Main Template ---
-export function CRUDPageTemplate<
-  T extends { id?: string | number; _id?: string },
->({
+export function CRUDPageTemplate<T>({
   title,
   data,
   columns,
+  rowKey,
 
   pageSize,
 
@@ -169,7 +175,7 @@ export function CRUDPageTemplate<
   } | null>(null);
 
   const filteredData = data;
-
+  const [searchData, setSearchData] = useState<Record<string, any>>({});
   useEffect(() => {
     if (pageSize) {
       setPageSizeState(pageSize);
@@ -241,9 +247,7 @@ export function CRUDPageTemplate<
   };
 
   const handleSearch = () => {
-    if (onSearch) {
-      onSearch(inputValue, filterInput);
-    }
+    onSearch?.(inputValue, filterInput, searchData);
   };
 
   const handleRefresh = () => {
@@ -253,6 +257,7 @@ export function CRUDPageTemplate<
     });
     setFilterInput(resetFilters);
     setInputValue("");
+    setSearchData({});
     onPageChange?.(1);
     if (onRefresh) {
       onRefresh();
@@ -383,37 +388,33 @@ export function CRUDPageTemplate<
         className="px-4 md:px-8 py-3 bg-gray-50/50 flex flex-col lg:flex-row gap-3 lg:items-center"
       >
         {/* SEARCH */}
-        <div className="relative w-full lg:flex-1 group">
-          {searchContent ? (
-            <div className="w-full">{searchContent}</div>
-          ) : (
-            <>
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400 group-focus-within:text-primary transition-colors" />
-              </div>
+        <div className="flex flex-col gap-3 w-full lg:flex-1">
+          {/* Search mặc định */}
+          <div className="relative w-full lg:flex-1 group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400 group-focus-within:text-primary transition-colors" />
+            </div>
 
-              <input
-                type="text"
-                placeholder="Tìm kiếm..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg bg-white
+            <input
+              type="text"
+              placeholder="Tìm kiếm..."
+              className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg bg-white
                   text-sm text-gray-900 placeholder-gray-400
                   focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
                   transition-all hover:border-gray-300"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSearch();
-                  }
-                }}
-              />
-            </>
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
+          </div>
+
+          {/* Search nâng cao */}
+          {searchContent && (
+            <div>{searchContent(searchData, setSearchData)}</div>
           )}
         </div>
 
         {/* FILTERS */}
-        {/* <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
           {filters.map((filter) => (
             <CustomSelect
               key={String(filter.key)}
@@ -432,7 +433,7 @@ export function CRUDPageTemplate<
               className="w-full sm:min-w-45"
             />
           ))}
-        </div> */}
+        </div>
 
         {/* ACTION BUTTONS */}
         <div className="flex gap-2 w-full sm:w-auto">
@@ -525,11 +526,13 @@ export function CRUDPageTemplate<
             <tbody className="divide-y divide-gray-100">
               {currentData.length > 0 ? (
                 currentData.map((item, index) => {
-                  const isDeleted = Boolean((item as any).is_deleted);
+                  const isInactiveOrDeleted =
+                    Boolean((item as any).isDeleted) ||
+                    (item as any).isActive === false;
 
                   return (
                     <tr
-                      key={item.id ?? index}
+                      key={String(item[rowKey])}
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
 
@@ -551,9 +554,9 @@ export function CRUDPageTemplate<
                         ${
                           focusedIndex === index
                             ? "bg-primary/10"
-                            : item.id === selectedRowId
+                            : item[rowKey] === selectedRowId
                               ? "bg-primary/5"
-                              : isDeleted
+                              : isInactiveOrDeleted
                                 ? "bg-gray-50 text-gray-400"
                                 : "bg-white hover:bg-primary/5"
                         }`}
@@ -577,7 +580,7 @@ export function CRUDPageTemplate<
 
                       {statusField && (
                         <td className="px-4 py-3 text-center">
-                          {!isDeleted ? (
+                          {!isInactiveOrDeleted ? (
                             <div className="flex flex-col items-center gap-1">
                               <ToggleSwitch
                                 checked={!!item[statusField]}
@@ -618,7 +621,7 @@ export function CRUDPageTemplate<
 
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {!isDeleted && onView && (
+                          {!isInactiveOrDeleted && onView && (
                             <button
                               title="Xem chi tiết"
                               onClick={() => onView(item)}
@@ -629,7 +632,7 @@ export function CRUDPageTemplate<
                           )}
                           {/*  */}
 
-                          {!isDeleted &&
+                          {!isInactiveOrDeleted &&
                             onEdit &&
                             (!canEdit || canEdit(item)) && (
                               <button
@@ -644,7 +647,7 @@ export function CRUDPageTemplate<
                               </button>
                             )}
 
-                          {!isDeleted && onDelete && (
+                          {!isInactiveOrDeleted && onDelete && (
                             <button
                               title="Xóa"
                               onClick={() => onDelete(item)}
@@ -654,7 +657,7 @@ export function CRUDPageTemplate<
                             </button>
                           )}
 
-                          {isDeleted && onRestore && (
+                          {isInactiveOrDeleted && onRestore && (
                             <button
                               title="Khôi phục"
                               onClick={() => handleRestore(item)}

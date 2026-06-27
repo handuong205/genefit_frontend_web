@@ -11,6 +11,7 @@ interface CRUDModalTemplateProps {
   children: React.ReactNode;
   maxWidth?: string;
   hideScrollbar?: boolean;
+  formId?: string;
 }
 
 export const CRUDModalTemplate = ({
@@ -23,6 +24,7 @@ export const CRUDModalTemplate = ({
   children,
   maxWidth = "max-w-2xl", 
   hideScrollbar = false,
+  formId,
 }: CRUDModalTemplateProps) => {
   if (!isOpen) return null;
 
@@ -73,8 +75,9 @@ export const CRUDModalTemplate = ({
 
           {mode !== "view" && (
             <button
-              type="button" 
-              onClick={onSave}
+              type={formId ? "submit" : "button"} 
+              form={formId}
+              onClick={!formId ? onSave : undefined}
               disabled={isLoading}
               className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
             >

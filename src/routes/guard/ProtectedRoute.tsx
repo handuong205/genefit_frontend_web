@@ -7,7 +7,7 @@ const ProtectedRoute = () => {
     
 
     if (!user) {
-        return <Navigate to={AUTH_ROUTE.ADMIN_LOGIN} />;
+        <Outlet />
     }
   return (
     <Outlet />

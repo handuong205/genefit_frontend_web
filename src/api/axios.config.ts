@@ -13,7 +13,7 @@ export const MSG_CONSTANT = {
 export const axiosClient = axios.create({
   baseURL: ENV.API_URL,
   timeout: 300000,
-  withCredentials: true,
+  withCredentials: false,
 });
 
 // Track if we're currently refreshing token
@@ -81,7 +81,11 @@ axiosClient.interceptors.response.use(
       }
     }
     console.log(error.message);
-    return Promise.reject(error.response?.data);
+    return Promise.reject({
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
   },
 );
 
@@ -89,7 +93,7 @@ axiosClient.interceptors.response.use(
 export const axiosAdminClient = axios.create({
   baseURL: ENV.API_URL,
   timeout: 300000,
-  withCredentials: true,
+  withCredentials: false,
 });
 
 // Track if we're currently refreshing admin token

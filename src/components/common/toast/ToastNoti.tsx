@@ -17,6 +17,5 @@ const ToastNoti = () => {
   )
 }
 
-ToastNoti.propTypes = {}
 
 export default ToastNoti
