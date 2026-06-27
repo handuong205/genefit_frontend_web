@@ -3,4 +3,6 @@ export const ADMIN_ROUTE = {
     DASHBOARD: '/admin/dashboard',
     USERS: '/admin/users',
     SETTINGS: '/admin/settings',
+    FOODS: '/admin/foods',
+    SUBSCRIPTIONS: '/admin/subscriptions',
 }

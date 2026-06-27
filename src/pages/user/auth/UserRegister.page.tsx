@@ -1,0 +1,409 @@
+import { Bounds, Center, Environment, OrbitControls, useGLTF } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { ArrowLeft, Lock, Mail, ShieldCheck, User } from "lucide-react";
+import { Suspense, useRef, useState } from "react";
+import type { ChangeEvent, ClipboardEvent, KeyboardEvent } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import type { Group } from "three";
+import ButtonSubmit from "../../../components/common/button/Button";
+import { PUBLIC_ROUTE } from "../../../constants/routes/public.route";
+import type { RegisterBody } from "./models/registerBody.model";
+import { OtpRequestService } from "./services/otpRequest.service";
+import { RegisterAccountService } from "./services/registerAccount.service";
+interface AccountFormInputs {
+  username: string;
+  password: string;
+  confirmPassword?: string;
+  email: string;
+}
+
+interface OtpFormInputs {
+  otpCode: string;
+}
+
+type RegisterStep = "account" | "otp";
+const OTP_LENGTH = 6;
+const createEmptyOtpDigits = () => Array<string>(OTP_LENGTH).fill("");
+
+const inputClass =
+  "peer w-full px-5 py-4 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl outline-none transition-all duration-200 focus:border-primary dark:focus:border-primary focus:bg-background-light dark:focus:bg-background-dark focus:shadow-lg focus:shadow-primary/10";
+
+const labelClass =
+  "absolute left-5 top-[1.3rem] pt-2 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-base font-medium pointer-events-none transition-all duration-200 bg-gray-50 dark:bg-gray-800 px-2 peer-placeholder-shown:top-[1.3rem] peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0 peer-focus:-top-3 peer-focus:text-base peer-focus:text-primary dark:peer-focus:text-primary peer-focus:bg-background-light dark:peer-focus:bg-background-dark peer-focus:px-2 peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:text-base peer-[:not(:placeholder-shown)]:text-primary dark:peer-[:not(:placeholder-shown)]:text-primary peer-[:not(:placeholder-shown)]:bg-background-light dark:peer-[:not(:placeholder-shown)]:bg-gray-900 peer-[:not(:placeholder-shown)]:px-2";
+
+const registerModelUrl = new URL("../../../assets/3DModels/apple.glb", import.meta.url).href;
+
+const RegisterModel = () => {
+  const modelRef = useRef<Group>(null);
+  const { scene } = useGLTF(registerModelUrl);
+
+  useFrame((_, delta) => {
+    if (modelRef.current) {
+      modelRef.current.rotation.y += delta * 0.35;
+    }
+  });
+
+  return (
+    <group ref={modelRef}>
+      <Center>
+        <primitive object={scene} />
+      </Center>
+    </group>
+  );
+};
+
+useGLTF.preload(registerModelUrl);
+
+const UserRegisterPage = () => {
+  const navigate = useNavigate();
+  const [step, setStep] = useState<RegisterStep>("account");
+  const [pendingAccount, setPendingAccount] = useState<AccountFormInputs | null>(null);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [otpDigits, setOtpDigits] = useState<string[]>(createEmptyOtpDigits);
+  const otpInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  const {
+    register: registerAccountField,
+    handleSubmit: handleAccountSubmit,
+    formState: { errors: accountErrors },
+    getValues,
+  } = useForm<AccountFormInputs>({
+    mode: "onChange",
+  });
+
+  const {
+    register: registerOtpField,
+    handleSubmit: handleOtpSubmit,
+    formState: { errors: otpErrors },
+    reset: resetOtpForm,
+    setValue: setOtpValue,
+  } = useForm<OtpFormInputs>({
+    mode: "onChange",
+    defaultValues: {
+      otpCode: "",
+    },
+  });
+
+  const syncOtpCode = (digits: string[]) => {
+    setOtpDigits(digits);
+    setOtpValue("otpCode", digits.join(""), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  const handleOtpDigitChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
+    const digit = event.target.value.replace(/\D/g, "").slice(-1);
+    const nextDigits = [...otpDigits];
+    nextDigits[index] = digit;
+    syncOtpCode(nextDigits);
+
+    if (digit && index < OTP_LENGTH - 1) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Backspace" || otpDigits[index]) {
+      return;
+    }
+
+    otpInputRefs.current[index - 1]?.focus();
+  };
+
+  const handleOtpPaste = (event: ClipboardEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    const pastedDigits = event.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, OTP_LENGTH)
+      .split("");
+
+    const nextDigits = createEmptyOtpDigits();
+    pastedDigits.forEach((digit, index) => {
+      nextDigits[index] = digit;
+    });
+
+    syncOtpCode(nextDigits);
+    const focusIndex = Math.min(pastedDigits.length, OTP_LENGTH - 1);
+    otpInputRefs.current[focusIndex]?.focus();
+  };
+
+  const handleRequestOtp = async (data: AccountFormInputs) => {
+    try {
+      setIsSendingOtp(true);
+      setPendingAccount(data);
+      await OtpRequestService(data.email);
+      resetOtpForm();
+      syncOtpCode(createEmptyOtpDigits());
+      setStep("otp");
+      toast.success("OTP đã được gửi đến email của bạn");
+    } catch (error) {
+      toast.error("Không thể gửi OTP. Vui lòng thử lại.");
+      console.error("Request OTP failed:", error);
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleRegister = async ({ otpCode }: OtpFormInputs) => {
+    if (!pendingAccount) {
+      toast.error("Vui lòng nhập thông tin tài khoản trước");
+      setStep("account");
+      return;
+    }
+
+    const registerBody: RegisterBody = {
+      username: pendingAccount.username,
+      passwordHash: pendingAccount.password,
+      email: pendingAccount.email,
+      otpCode,
+    };
+
+    try {
+      setIsRegistering(true);
+      await RegisterAccountService(registerBody);
+      toast.success("Đăng ký tài khoản thành công");
+      navigate(PUBLIC_ROUTE.LOGIN);
+    } catch (error) {
+      toast.error("Đăng ký thất bại. Vui lòng kiểm tra OTP và thử lại.");
+      console.error("Register failed:", error);
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const handleBackToAccount = () => {
+    setStep("account");
+    resetOtpForm();
+    syncOtpCode(createEmptyOtpDigits());
+  };
+
+  return (
+    <div className="w-full min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark px-4 py-8">
+      <div className="flex w-full max-w-5xl min-h-115 border border-secondary rounded-2xl shadow-2xl bg-background-light dark:bg-background-dark overflow-hidden">
+        <div className="hidden lg:flex flex-1 flex-col justify-between bg-primary/10 border-r border-secondary px-8 py-10">
+          <div className="h-[320px] w-full">
+            <Canvas camera={{ position: [0, 0.8, 5], fov: 38 }}>
+              <ambientLight intensity={1.8} />
+              <directionalLight position={[3, 4, 5]} intensity={2.4} />
+              <Suspense fallback={null}>
+                <Bounds fit clip observe margin={1.25}>
+                  <RegisterModel />
+                </Bounds>
+                <Environment preset="city" />
+              </Suspense>
+              <OrbitControls
+                enablePan={false}
+                enableZoom={false}
+                minPolarAngle={Math.PI / 3}
+                maxPolarAngle={Math.PI / 1.8}
+              />
+            </Canvas>
+          </div>
+          <div className="max-w-sm">
+            <p className="text-sm font-semibold text-primary mb-4">
+              Genefit
+            </p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Bắt đầu hành trình sức khỏe của bạn
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 text-base">
+              Tạo tài khoản và xác thực email để sử dụng các tính năng cá nhân hóa.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <div className="text-center mb-10">
+            <h1 className="pt-12 text-4xl font-bold text-gray-900 dark:text-white mb-3">
+              Đăng ký
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              {step === "account"
+                ? "Nhập thông tin tài khoản để nhận OTP"
+                : "Nhập mã OTP đã gửi đến email của bạn"}
+            </p>
+          </div>
+
+          <div className="px-8 md:px-10 pb-10">
+            <div className="mb-8 grid grid-cols-2 gap-3">
+              <div className={`h-2 rounded-full ${step === "account" ? "bg-primary" : "bg-primary/50"}`} />
+              <div className={`h-2 rounded-full ${step === "otp" ? "bg-primary" : "bg-gray-200 dark:bg-gray-700"}`} />
+            </div>
+
+            {step === "account" ? (
+              <form className="flex-col" method="POST" onSubmit={handleAccountSubmit(handleRequestOtp)}>
+                <div className="flex flex-col gap-6">
+                  <div className="relative py-2 pb-2 pt-3">
+                    <input
+                      id="username"
+                      type="text"
+                      placeholder=" "
+                      {...registerAccountField("username", {
+                        required: "Tên tài khoản không được để trống",
+                        minLength: {
+                          value: 8,
+                          message: "Tên tài khoản phải có ít nhất 8 ký tự",
+                        },
+                      })}
+                      className={inputClass}
+                    />
+                    <label htmlFor="username" className={labelClass}>
+                      <User size={18} className="text-current" />
+                      Tên tài khoản
+                    </label>
+                    {accountErrors.username && (
+                      <p className="absolute -bottom-4 left-2 text-sm text-error pt-2">
+                        {accountErrors.username.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="relative py-2 pb-2 pt-3">
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder=" "
+                      {...registerAccountField("email", {
+                        required: "Email không được để trống",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Email sai định dạng (ví dụ: abc@gmail.com)",
+                        },
+                      })}
+                      className={inputClass}
+                    />
+                    <label htmlFor="email" className={labelClass}>
+                      <Mail size={18} className="text-current" />
+                      Email
+                    </label>
+                    {accountErrors.email && (
+                      <p className="absolute -bottom-4 left-2 text-sm text-error pt-2">
+                        {accountErrors.email.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="relative py-2 pb-2 pt-3">
+                    <input
+                      id="password"
+                      type="password"
+                      placeholder=" "
+                      {...registerAccountField("password", {
+                        required: "Mật khẩu không được để trống",
+                        minLength: {
+                          value: 8,
+                          message: "Mật khẩu phải có ít nhất 8 ký tự",
+                        },
+                      })}
+                      className={inputClass}
+                    />
+                    <label htmlFor="password" className={labelClass}>
+                      <Lock size={18} className="text-current" />
+                      Mật khẩu
+                    </label>
+                    {accountErrors.password && (
+                      <p className="absolute -bottom-4 left-2 text-sm text-error pt-2">
+                        {accountErrors.password.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="relative py-2 pb-2 pt-3">
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder=" "
+                      {...registerAccountField("confirmPassword", {
+                        required: "Xác nhận mật khẩu không được để trống",
+                        validate: (value) =>
+                          value === getValues("password") || "Mật khẩu xác nhận không khớp",
+                      })}
+                      className={inputClass}
+                    />
+                    <label htmlFor="confirmPassword" className={labelClass}>
+                      <Lock size={18} className="text-current" />
+                      Xác nhận mật khẩu
+                    </label>
+                    {accountErrors.confirmPassword && (
+                      <p className="absolute -bottom-4 left-2 text-sm text-error pt-2">
+                        {accountErrors.confirmPassword.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <ButtonSubmit label="Nhận OTP" className="mt-8" loading={isSendingOtp} />
+              </form>
+            ) : (
+              <form className="flex-col" method="POST" onSubmit={handleOtpSubmit(handleRegister)}>
+                <button
+                  type="button"
+                  onClick={handleBackToAccount}
+                  className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                >
+                  <ArrowLeft size={16} />
+                  Sửa thông tin tài khoản
+                </button>
+
+                <div className="rounded-xl bg-primary/10 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 mb-6">
+                  OTP đã được gửi đến <span className="font-semibold text-primary">{pendingAccount?.email}</span>
+                </div>
+
+                <div className="relative py-2 pb-5 pt-3">
+                  <div className="mb-3 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-base font-medium">
+                    <ShieldCheck size={18} className="text-current" />
+                    OTP
+                  </div>
+                  <input
+                    type="hidden"
+                    {...registerOtpField("otpCode", {
+                      required: "OTP không được để trống",
+                      pattern: {
+                        value: /^[0-9]{6}$/,
+                        message: "OTP phải gồm 6 chữ số",
+                      },
+                    })}
+                  />
+                  <div className="grid grid-cols-6 gap-3">
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(element) => {
+                          otpInputRefs.current[index] = element;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete={index === 0 ? "one-time-code" : "off"}
+                        maxLength={1}
+                        value={digit}
+                        onChange={(event) => handleOtpDigitChange(index, event)}
+                        onKeyDown={(event) => handleOtpKeyDown(index, event)}
+                        onPaste={handleOtpPaste}
+                        className="h-14 w-full rounded-2xl border-2 border-gray-200 bg-gray-50 text-center text-xl font-bold text-gray-900 outline-none transition-all duration-200 focus:border-primary focus:bg-background-light focus:shadow-lg focus:shadow-primary/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-primary dark:focus:bg-background-dark"
+                        aria-label={`OTP digit ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                  {otpErrors.otpCode && (
+                    <p className="absolute -bottom-1 left-2 text-sm text-error pt-2">
+                      {otpErrors.otpCode.message}
+                    </p>
+                  )}
+                </div>
+
+                <ButtonSubmit label="Đăng ký" className="mt-8" loading={isRegistering} />
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserRegisterPage;

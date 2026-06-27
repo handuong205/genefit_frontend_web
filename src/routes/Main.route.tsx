@@ -13,6 +13,10 @@ import ProtectedRoute from "./guard/ProtectedRoute";
 import { AUTH_ROUTE } from "../constants/routes/auth.route";
 import AdminLogin from "../pages/admin/auth/AdminLogin.page";
 import ToastNoti from "../components/common/toast/ToastNoti";
+import FoodsPage from "../pages/admin/food/Food.page";
+import SubscriptionPage from "../pages/admin/subscription/Subscription.page";
+import Verify from "../pages/verify";
+import UserRegisterPage from "../pages/user/auth/UserRegister.page";
 
 const MainRoute = () => {
   return (
@@ -24,6 +28,8 @@ const MainRoute = () => {
           <Route path="/" element={<Navigate to="/home" replace />}/>
           <Route path={PUBLIC_ROUTE.HOME} element={<HomePage/>} />
           <Route path={PUBLIC_ROUTE.ABOUT} element={<AboutPage />}/>
+          <Route path={PUBLIC_ROUTE.VERIFY} element={<Verify />}/>
+          
         </Route>
 
         <Route element={<ProtectedRoute/>}>
@@ -33,9 +39,12 @@ const MainRoute = () => {
           <Route path={ADMIN_ROUTE.DASHBOARD} element={<DashboardPage />}/>
           <Route path={ADMIN_ROUTE.USERS} element={<UsersPage />}/>
           <Route path={ADMIN_ROUTE.SETTINGS} element={<SettingsPage />}/>
+          <Route path={ADMIN_ROUTE.FOODS} element={<FoodsPage />} />
+          <Route path={ADMIN_ROUTE.SUBSCRIPTIONS} element={<SubscriptionPage />} />
         </Route>
         </Route>
         <Route path={AUTH_ROUTE.ADMIN_LOGIN} element={<AdminLogin />} />
+        <Route path={PUBLIC_ROUTE.REGISTER} element={<UserRegisterPage />}/>
         <Route path="*" element={<NotFoundPage />}/>
       </Routes>
       

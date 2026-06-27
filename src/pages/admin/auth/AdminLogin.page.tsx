@@ -64,11 +64,11 @@ interface LoginFormInputs {
 
   return (
     <div className="w-full h-screen flex items-center justify-center">
-      <div className="flex lg:grid-cols-[280px_1fr] border border-secondary w-3/5 h-4/5 rounded-2xl shadow-2xl bg-background-light dark:bg-background-dark">
-        <div className="flex-1 border-r border-secondary">
+      <div className="flex lg:grid-cols-[280px_1fr] border border-secondary w-xl h-4/5 rounded-2xl shadow-2xl bg-background-light dark:bg-background-dark">
+        <div className="flex-1  ">
           <div className="text-center mb-15">
             <h1 className="pt-15 text-4xl font-bold text-gray-900 dark:text-white mb-3">
-              Chào mừng trở lại!
+              Admin 
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-lg">
               Hãy đăng nhập để tiếp tục
@@ -206,9 +206,7 @@ interface LoginFormInputs {
                 </button> */}
           </div>
         </div>
-        <div className="flex-1 flex items-center justify-center hidden lg:flex">
-            Ảnh hoặc nội dung gì đó nhưng chưa thiết kế
-        </div>
+        
       </div>
     </div>
   );

@@ -6,5 +6,7 @@ export const PUBLIC_ROUTE ={
     ABOUT: '/about',
     CONTACT: '/contact',
     PRICING: '/pricing',
+    VERIFY: '/verify-email',
+    REGISTER: '/register',
 }
 

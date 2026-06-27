@@ -101,7 +101,9 @@ const Header: React.FC = () => {
             Đăng nhập
           </button>
           
-          <button className="px-5 py-2 text-sm font-semibold bg-primary text-white rounded-full shadow-sm hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer">
+          <button
+           onClick={()=> navigate(PUBLIC_ROUTE.REGISTER)}
+           className="px-5 py-2 text-sm font-semibold bg-primary text-white rounded-full shadow-sm hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer">
             Bắt đầu
           </button>
         </div>
