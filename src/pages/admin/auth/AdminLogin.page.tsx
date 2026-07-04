@@ -11,56 +11,56 @@ import { toast } from "react-toastify";
 
 
 const AdminLogin = () => {
-    const navigate = useNavigate();
-    // const [error, setError] = useState<string>('');
-    const loginUser = useAuthStore((state) => state.login);
+  const navigate = useNavigate();
+  // const [error, setError] = useState<string>('');
+  const loginUser = useAuthStore((state) => state.login);
 
-interface LoginFormInputs {
-  email: string;
-  password: string;
-}
-    const {
+  interface LoginFormInputs {
+    email: string;
+    password: string;
+  }
+  const {
     register,
     handleSubmit,
     formState: { errors },
     setError
   } = useForm<LoginFormInputs>({
-    mode: 'onChange', 
+    mode: 'onChange',
   });
 
-    const onSubmit = (data: LoginFormInputs) => {
-      const {email, password} = data;
-      const user = USERS.find((u) => u.email === email);
+  const onSubmit = (data: LoginFormInputs) => {
+    const { email, password } = data;
+    const user = USERS.find((u) => u.email === email);
 
-      if (!user) {
-        toast.error("Tài khoản không tồn tại.");
-        setError("email", {
-          type: "manual",
-          message: "Tài khoản không tồn tại!",
-        });
-        return;
-      }
-      if (password !== "123456") {
-        toast.error("Mật khẩu không chính xác.");
-        setError("password", {
-          type: "manual",
-          message: "Mật khẩu không chính xác!",
-        });
-        return;
-      }
-      if (user.role !== "ADMIN") {
-        toast.error("Truy cập bị từ chối.");
-        setError("email", {
-          type: "manual",
-          message: "Truy cập bị từ chối.",
-        });
-        return;
-      }
+    if (!user) {
+      toast.error("Tài khoản không tồn tại.");
+      setError("email", {
+        type: "manual",
+        message: "Tài khoản không tồn tại!",
+      });
+      return;
+    }
+    if (password !== "123456") {
+      toast.error("Mật khẩu không chính xác.");
+      setError("password", {
+        type: "manual",
+        message: "Mật khẩu không chính xác!",
+      });
+      return;
+    }
+    if (user.role !== "ADMIN") {
+      toast.error("Truy cập bị từ chối.");
+      setError("email", {
+        type: "manual",
+        message: "Truy cập bị từ chối.",
+      });
+      return;
+    }
 
-      loginUser(user, user.token);
-      navigate(ADMIN_ROUTE.ADMIN);
-      toast.success("Đăng nhập thành công");
-    };
+    loginUser(user, user.token);
+    navigate(ADMIN_ROUTE.ADMIN);
+    toast.success("Đăng nhập thành công");
+  };
 
   return (
     <div className="w-full h-screen flex items-center justify-center">
@@ -68,7 +68,7 @@ interface LoginFormInputs {
         <div className="flex-1  ">
           <div className="text-center mb-15">
             <h1 className="pt-15 text-4xl font-bold text-gray-900 dark:text-white mb-3">
-              Admin 
+              Admin
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-lg">
               Hãy đăng nhập để tiếp tục
@@ -206,7 +206,7 @@ interface LoginFormInputs {
                 </button> */}
           </div>
         </div>
-        
+
       </div>
     </div>
   );
