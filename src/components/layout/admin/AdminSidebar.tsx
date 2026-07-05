@@ -1,17 +1,17 @@
 
-import {Broccoli, ChevronDown, LayoutDashboard, LogOut, PiggyBank, Settings, Users} from 'lucide-react'
+import { Broccoli, ChevronDown, CircleDollarSign, LayoutDashboard, LogOut, PiggyBank, Settings, Users } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ADMIN_ROUTE } from '../../../constants/routes/admin.route';
 import { useAuthStore } from '../../../stores/auth.store';
 
 
-interface NavItem  {
-    label: string
-    path: string
-    icon: React.ReactNode
-    badge?: string
-    submenu?: NavItem[]
+interface NavItem {
+  label: string
+  path: string
+  icon: React.ReactNode
+  badge?: string
+  submenu?: NavItem[]
 }
 
 const Items: NavItem[] = [
@@ -41,6 +41,11 @@ const Items: NavItem[] = [
     label: "Subscriptions",
     path: ADMIN_ROUTE.SUBSCRIPTIONS,
     icon: <PiggyBank className="w-5 h-5" />,
+  },
+  {
+    label: "Payment",
+    path: ADMIN_ROUTE.PAYMENTS,
+    icon: <CircleDollarSign className="w-5 h-5" />,
   }
 ];
 
@@ -50,14 +55,14 @@ const bottomNavItems: NavItem[] = [
     path: ADMIN_ROUTE.SETTINGS,
     icon: <Settings className="w-5 h-5" />,
   },
-  
+
 ]
 
 
 const AdminSidebar = () => {
-//   const [isOpen, setIsOpen] = useState(false)
+  //   const [isOpen, setIsOpen] = useState(false)
   const [expandedItems, setExpandedItems] = useState<string[]>([])
-  const  pathname  = useLocation();
+  const pathname = useLocation();
   const navigate = useNavigate()
 
   const toggleSubmenu = (label: string) => {
@@ -96,28 +101,25 @@ const AdminSidebar = () => {
               <>
                 <button
                   onClick={() => toggleSubmenu(item.label)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-color cursor-pointer  ${
-                    isActive(item.path)
-                      ? "bg-primary text-white"
-                      : "text-black hover:bg-primary hover:text-white"
-                  }`}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-color cursor-pointer  ${isActive(item.path)
+                    ? "bg-primary text-white"
+                    : "text-black hover:bg-primary hover:text-white"
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     {item.icon}
                     <span>{item.label}</span>
                   </div>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      expandedItems.includes(item.label) ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${expandedItems.includes(item.label) ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
                 <div
-                  className={`grid transition-all duration-300 ease-in-out ${
-                    expandedItems.includes(item.label)
-                      ? "grid-rows-[1fr] opacity-100"
-                      : "grid-rows-[0fr] opacity-0"
-                  }`}
+                  className={`grid transition-all duration-300 ease-in-out ${expandedItems.includes(item.label)
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0"
+                    }`}
                 >
                   <div className="overflow-hidden">
                     <div className="mt-2  border-primary pl-3 space-y-2">
@@ -125,11 +127,10 @@ const AdminSidebar = () => {
                         <div
                           key={subitem.label}
                           onClick={() => navigate(subitem.path)}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
-                            isActive(subitem.path)
-                              ? "bg-primary/80 text-white"
-                              : "text-black hover:bg-primary/80 hover:text-white"
-                          }`}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${isActive(subitem.path)
+                            ? "bg-primary/80 text-white"
+                            : "text-black hover:bg-primary/80 hover:text-white"
+                            }`}
                         >
                           {subitem.icon}
                           <span>{subitem.label}</span>
@@ -141,12 +142,11 @@ const AdminSidebar = () => {
               </>
             ) : (
               <div
-                onClick={() => {navigate(item.path); setExpandedItems([]);}}
-                className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors group hover:bg-primary hover:text-white cursor-pointer ${
-                  isActive(item.path)
-                    ? "bg-primary text-white"
-                    : "text-black hover:bg-primary hover:text-white"
-                }`}
+                onClick={() => { navigate(item.path); setExpandedItems([]); }}
+                className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors group hover:bg-primary hover:text-white cursor-pointer ${isActive(item.path)
+                  ? "bg-primary text-white"
+                  : "text-black hover:bg-primary hover:text-white"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   {item.icon}
@@ -168,12 +168,11 @@ const AdminSidebar = () => {
         {bottomNavItems.map((item) => (
           <div
             key={item.label}
-            onClick={() => {navigate(item.path); setExpandedItems([]);}}
-            className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-              isActive(item.path)
-                ? "bg-primary text-white"
-                : "text-black hover:bg-primary hover:text-white"
-            }`}
+            onClick={() => { navigate(item.path); setExpandedItems([]); }}
+            className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${isActive(item.path)
+              ? "bg-primary text-white"
+              : "text-black hover:bg-primary hover:text-white"
+              }`}
           >
             {item.icon}
             <span>{item.label}</span>

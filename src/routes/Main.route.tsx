@@ -15,6 +15,7 @@ import AdminLogin from "../pages/admin/auth/AdminLogin.page";
 import ToastNoti from "../components/common/toast/ToastNoti";
 import FoodsPage from "../pages/admin/food/Food.page";
 import SubscriptionPage from "../pages/admin/subscription/Subscription.page";
+import PaymentManagementPage from "../pages/admin/payment/Payment.page.history";
 import Verify from "../pages/verify";
 import UserRegisterPage from "../pages/user/auth/UserRegister.page";
 
@@ -41,6 +42,7 @@ const MainRoute = () => {
           <Route path={ADMIN_ROUTE.SETTINGS} element={<SettingsPage />}/>
           <Route path={ADMIN_ROUTE.FOODS} element={<FoodsPage />} />
           <Route path={ADMIN_ROUTE.SUBSCRIPTIONS} element={<SubscriptionPage />} />
+          <Route path={ADMIN_ROUTE.PAYMENTS} element={<PaymentManagementPage />} />
         </Route>
         </Route>
         <Route path={AUTH_ROUTE.ADMIN_LOGIN} element={<AdminLogin />} />
