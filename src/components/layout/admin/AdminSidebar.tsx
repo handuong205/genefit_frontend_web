@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ADMIN_ROUTE } from '../../../constants/routes/admin.route';
 import { useAuthStore } from '../../../stores/auth.store';
+import { AUTH_ROUTE } from '../../../constants/routes/auth.route';
+import { axiosAdminClient } from '../../../api/axios.config';
+import { toast } from 'react-toastify';
 
 
 interface NavItem {
@@ -73,9 +76,22 @@ const AdminSidebar = () => {
 
   const isActive = (path: string) => pathname.pathname === path;
 
-  const handleLogout = () => {
-    useAuthStore.getState().logout();
-
+  const handleLogout = async () => {
+    try {
+      const token = useAuthStore.getState().token;
+      if (token) {
+        await axiosAdminClient.post('/api/auth/logout', {
+          accessToken: token,
+          refreshToken: ""
+        });
+      }
+    } catch (error) {
+      console.error("Logout API failed", error);
+    } finally {
+      useAuthStore.getState().logout();
+      navigate(AUTH_ROUTE.ADMIN_LOGIN);
+      toast.success("Đăng xuất thành công");
+    }
   }
 
   return (
