@@ -1,23 +1,22 @@
 import { axiosClient } from "../../../../api/axios.config";
+import type { GetPlansResponse } from "../models/searchSubscription.model";
 
 
 export type SearchPlansRequest = {
-    keyword?: string;
-    pageInfo?: {
-        pageNum?: number;
-        pageSize?: number;
-    }
-}
+  keyword?: string;
+  pageInfo?: {
+    pageNum?: number;
+    pageSize?: number;
+  };
+};
 
-export const searchPlanService = async (body: SearchPlansRequest) => {
-    try{
-        const res = await axiosClient.post(`/api/subscription-plans/get-all`, body);
-        if(res.status === 200){
-            return res.data;
-        }
-    }catch(error :any){
-        console.log("ERROR", error);
-        console.log("STATUS", error?.response?.status);
-        console.log("DATA", error?.response?.data);
-    }
+export const searchPlanService = async (body: SearchPlansRequest): Promise<GetPlansResponse> => {
+  const res = await axiosClient.get<GetPlansResponse>(`/api/subscriptions/plans`, {
+    params: {
+      pageNum: body.pageInfo?.pageNum ?? 1,
+      pageSize: body.pageInfo?.pageSize ?? 10,
+    },
+  });
+
+  return res.data;
 };

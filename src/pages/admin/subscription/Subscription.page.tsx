@@ -7,8 +7,7 @@ import {
 } from "../../../components/template/CRUDTemplate";
 import { CRUDModalTemplate } from "../../../components/template/CRUDModal";
 import { ActionConfirmModal } from "../../../components/template/ActionConfirmModal";
-import SubscriptionModal, {
-} from "../../../components/admin/subscription/SubscriptionModal";
+import SubscriptionModal from "../../../components/admin/subscription/SubscriptionModal";
 import type { SubscriptionPlan } from "./models/searchSubscription.model";
 import type { UpdatePlanRequest } from "./models/updateSubscription.model";
 import { searchPlanService } from "./services/searchSubscription.service";
@@ -20,9 +19,18 @@ import { toPlanRequest } from "../../../utils/subscription/subscription.utils";
 
 type FormMode = "create" | "edit" | "view";
 
+const getErrorMessage = (error: unknown) => {
+  if (typeof error === "object" && error && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+
+  return "Có lỗi xảy ra, vui lòng thử lại.";
+};
+
 const SubscriptionPage = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [plans, setPlans] = useState<SubscriptionPlan[] | null>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -34,26 +42,23 @@ const SubscriptionPage = () => {
   );
 
   const fetchPlans = useCallback(
-    async (pageNum = 1, type: "full" | "table" = "full", size = pageSize) => {
+    async (pageNum = 1, size = pageSize) => {
       try {
-        if (type === "full") setIsTableLoading(true);
-        if (type === "table") setIsTableLoading(true);
+        setIsTableLoading(true);
         const response = await searchPlanService({
-          keyword: "",
           pageInfo: {
             pageNum,
             pageSize: size,
           },
         });
 
-        if (response) {
-          setPlans(response.content);
-          setTotalItems(response.pageInfo?.totalItem);
-          setPage(response.pageInfo?.pageNum || 1);
-          setPageSize(response.pageInfo?.pageSize || 10);
-        }
+        setPlans(response.data ?? []);
+        setTotalItems(response.pagination?.totalItems ?? 0);
+        setPage((response.pagination?.pageNum ?? 0) + 1);
+        setPageSize(response.pagination?.pageSize ?? size);
       } catch (error) {
         console.error("Error fetching subscription plans:", error);
+        toast.error(getErrorMessage(error));
       } finally {
         setIsTableLoading(false);
       }
@@ -62,7 +67,7 @@ const SubscriptionPage = () => {
   );
 
   useEffect(() => {
-    fetchPlans(1, "full");
+    void fetchPlans(1);
   }, [fetchPlans]);
 
   const handleToggleActive = async (item: SubscriptionPlan) => {
@@ -72,11 +77,11 @@ const SubscriptionPage = () => {
         ...toPlanRequest(item),
         active: !item.active,
       });
-      toast.success("Cap nhat trang thai goi thanh cong!");
-      fetchPlans(page, "table");
+      toast.success("Cập nhật trạng thái gói thành công!");
+      void fetchPlans(page);
     } catch (error) {
       console.error("Error updating subscription status:", error);
-      toast.error("Co loi xay ra, vui long thu lai.");
+      toast.error(getErrorMessage(error));
     } finally {
       setIsTableLoading(false);
     }
@@ -90,7 +95,7 @@ const SubscriptionPage = () => {
       className: "text-center",
     },
     {
-      header: "Loại ",
+      header: "Loại",
       accessor: "planType",
       className: "text-center",
     },
@@ -101,7 +106,7 @@ const SubscriptionPage = () => {
       render(item) {
         return (
           <span className="font-medium text-gray-700">
-            {Number(item.price).toLocaleString("vi-VN")} d
+            {Number(item.price).toLocaleString("vi-VN")} đ
           </span>
         );
       },
@@ -116,10 +121,18 @@ const SubscriptionPage = () => {
     },
     {
       header: "AI Scan",
-      accessor: "aiScanLimitPerMonth",
+      accessor: "maxAiScansPerDay",
       className: "text-center",
       render(item) {
-        return <span>{item.aiScanLimitPerMonth}/tháng</span>;
+        return <span>{item.maxAiScansPerDay}/ngày</span>;
+      },
+    },
+    {
+      header: "Lịch sử",
+      accessor: "maxHistoryViewDays",
+      className: "text-center",
+      render(item) {
+        return <span>{item.maxHistoryViewDays} ngày</span>;
       },
     },
     {
@@ -152,50 +165,25 @@ const SubscriptionPage = () => {
           { ...formData } as UpdatePlanRequest,
         );
 
-        const res = await createPlanService(createBody);
-        if (res) {
-          toast.success("Tao goi dang ky thanh cong!");
-        }
+        await createPlanService(createBody);
+        toast.success("Tạo gói đăng ký thành công!");
       } else if (formMode === "edit" && selectedItem?.planId) {
-        const res = await updatePlanService(selectedItem.planId, formData);
-        if (res) {
-          toast.success("Cap nhat goi dang ky thanh cong!");
-        }
+        await updatePlanService(selectedItem.planId, formData);
+        toast.success("Cập nhật gói đăng ký thành công!");
       }
 
       setIsFormOpen(false);
-      fetchPlans(page, "table");
+      void fetchPlans(page);
     } catch (error) {
       console.error("Error saving subscription plan:", error);
-      toast.error("Co loi xay ra, vui long thu lai.");
+      toast.error(getErrorMessage(error));
     } finally {
       setIsTableLoading(false);
     }
   };
 
-  const handleSearch = async (searchTerm?: string) => {
-    try {
-      setIsTableLoading(true);
-      const response = await searchPlanService({
-        keyword: searchTerm || "",
-        pageInfo: {
-          pageNum: 1,
-          pageSize,
-        },
-      });
-
-      if (response) {
-        setPlans(response.content);
-        setTotalItems(response.pageInfo?.totalItem);
-        setPage(response.pageInfo?.pageNum || 1);
-        setPageSize(response.pageInfo?.pageSize || 10);
-      }
-    } catch (error) {
-      console.error("Error searching subscription plans:", error);
-      toast.error("Co loi xay ra, vui long thu lai.");
-    } finally {
-      setIsTableLoading(false);
-    }
+  const handleSearch = async () => {
+    await fetchPlans(1);
   };
 
   const handleDeleteOpen = (item: SubscriptionPlan) => {
@@ -209,12 +197,12 @@ const SubscriptionPage = () => {
     try {
       setIsTableLoading(true);
       await deletePlanService(selectedItem.planId);
-      toast.success("Xoa goi dang ky thanh cong!");
+      toast.success("Xóa gói đăng ký thành công!");
       setIsDeleteOpen(false);
-      fetchPlans(page, "table");
+      void fetchPlans(page);
     } catch (error) {
       console.error("Error deleting subscription plan:", error);
-      toast.error("Co loi xay ra, vui long thu lai.");
+      toast.error(getErrorMessage(error));
     } finally {
       setIsTableLoading(false);
     }
@@ -223,19 +211,19 @@ const SubscriptionPage = () => {
   return (
     <>
       <CRUDPageTemplate<SubscriptionPlan>
-        title="Quan ly goi dang ky"
+        title="Quản lý gói đăng ký"
         rowKey="planId"
         columns={columns}
-        data={plans || []}
+        data={plans}
         isTableLoading={isTableLoading}
         onSearch={handleSearch}
         pageSize={pageSize}
         totalItems={totalItems}
         currentPage={page}
-        onPageChange={(nextPage) => fetchPlans(nextPage, "table")}
+        onPageChange={(nextPage) => fetchPlans(nextPage)}
         onPageSizeChange={(size) => {
           setPageSize(size);
-          fetchPlans(1, "full", size);
+          void fetchPlans(1, size);
         }}
         onAdd={() => {
           setFormMode("create");
@@ -280,7 +268,7 @@ const SubscriptionPage = () => {
           onConfirm={handleDeleteConfirm}
           type="delete"
           message="Bạn có chắc chắn muốn xóa gói đăng ký này không?"
-          isLoading={false}
+          isLoading={isTableLoading}
         />
       )}
     </>

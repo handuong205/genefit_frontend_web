@@ -5,39 +5,34 @@ export interface SubscriptionPlan {
   description: string;
   price: number;
   durationDays: number;
-
-  aiScanLimitPerMonth: number;
+  maxAiScansPerDay: number;
+  maxHistoryViewDays: number;
   mealSuggestionLimitPerMonth: number;
   reminderLimit: number;
-
   maxMembers: number;
   maxClients: number;
-
   trial: boolean;
   familySharingEnabled: boolean;
   coachFeaturesEnabled: boolean;
-
   mealPlanEnabled: boolean;
   weeklyReportEnabled: boolean;
   monthlyReportEnabled: boolean;
   exportReportEnabled: boolean;
-
   macroTrackingEnabled: boolean;
   calorieDeficitTrackingEnabled: boolean;
   calorieSurplusTrackingEnabled: boolean;
   bloodSugarControlEnabled: boolean;
-
   active: boolean;
 }
 
 export interface PageInfo {
   pageNum: number;
   pageSize: number;
-  totalPage: number;
-  totalItem: number;
+  totalPages: number;
+  totalItems: number;
 }
 
 export interface GetPlansResponse {
-  content: SubscriptionPlan[];
-  pageInfo: PageInfo;
+  data: SubscriptionPlan[];
+  pagination?: PageInfo;
 }

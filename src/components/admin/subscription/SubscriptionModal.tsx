@@ -1,10 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { ClipboardList, Settings2, Sparkles } from "lucide-react";
 import type { SubscriptionPlan } from "../../../pages/admin/subscription/models/searchSubscription.model";
-import type {
-  PlanType,
-  UpdatePlanRequest,
-} from "../../../pages/admin/subscription/models/updateSubscription.model";
+import type { UpdatePlanRequest } from "../../../pages/admin/subscription/models/updateSubscription.model";
 import { useAppForm } from "../../../hooks/useAppForm";
 import Toggle from "../../common/form/Toggle";
 import { FormInput } from "../../common/form/FormInput";
@@ -49,7 +46,8 @@ const SubscriptionModal = ({ mode, plan, onSubmit }: SubscriptionModalProps) => 
       description: formData.description,
       price: Number(formData.price),
       durationDays: Number(formData.durationDays),
-      aiScanLimitPerMonth: Number(formData.aiScanLimitPerMonth),
+      maxAiScansPerDay: Number(formData.maxAiScansPerDay),
+      maxHistoryViewDays: Number(formData.maxHistoryViewDays),
       mealSuggestionLimitPerMonth: Number(formData.mealSuggestionLimitPerMonth),
       reminderLimit: Number(formData.reminderLimit),
       maxMembers: Number(formData.maxMembers),
@@ -178,15 +176,26 @@ const SubscriptionModal = ({ mode, plan, onSubmit }: SubscriptionModalProps) => 
               error={errors.durationDays}
             />
             <FormInput
-              label="số lượt scan mỗi tháng"
+              label="Số lượt scan mỗi ngày"
               type="number"
-              defaultValue={plan?.aiScanLimitPerMonth ?? 0}
+              defaultValue={plan?.maxAiScansPerDay ?? 0}
               isDisabled={isView}
-              register={register("aiScanLimitPerMonth", {
+              register={register("maxAiScansPerDay", {
                 required: "Giới hạn AI scan không được để trống",
                 min: { value: 0, message: "Giới hạn phải lớn hơn hoặc bằng 0" },
               })}
-              error={errors.aiScanLimitPerMonth}
+              error={errors.maxAiScansPerDay}
+            />
+            <FormInput
+              label="Số ngày xem lịch sử"
+              type="number"
+              defaultValue={plan?.maxHistoryViewDays ?? 0}
+              isDisabled={isView}
+              register={register("maxHistoryViewDays", {
+                required: "Giới hạn lịch sử không được để trống",
+                min: { value: 0, message: "Giới hạn phải lớn hơn hoặc bằng 0" },
+              })}
+              error={errors.maxHistoryViewDays}
             />
             <FormInput
               label="Gợi ý bữa ăn mỗi tháng"

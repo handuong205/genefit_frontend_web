@@ -1,13 +1,9 @@
 export type PlanType =
   | "FREE"
-  | "WEIGHT_LOSS"
-  | "WEIGHT_GAIN"
-  | "MAINTENANCE"
-  | "DIABETES"
+  | "TRIAL"
   | "COACH"
   | "FAMILY"
-  | "PREMIUM"
-  | "TRIAL_PREMIUM";
+  | "PREMIUM";
 
 export interface UpdatePlanRequest {
   planType: PlanType;
@@ -16,7 +12,8 @@ export interface UpdatePlanRequest {
   price: number;
   durationDays: number;
 
-  aiScanLimitPerMonth: number;
+  maxAiScansPerDay: number;
+  maxHistoryViewDays: number;
   mealSuggestionLimitPerMonth: number;
   reminderLimit: number;
 
