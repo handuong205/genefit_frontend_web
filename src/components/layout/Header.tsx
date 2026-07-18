@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { PUBLIC_ROUTE } from "../../constants/routes/public.route";
+import { AUTH_ROUTE } from "../../constants/routes/auth.route";
 import { useNavigate } from "react-router-dom";
 
 
@@ -47,15 +48,19 @@ const Header: React.FC = () => {
     >
       <div className="px-10 mx-auto flex items-center justify-between h-12">
         
-        <div className="flex items-center gap-3 group cursor-pointer">
-          <div className="relative flex items-center justify-center h-10 w-10 bg-emerald-500 rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
-            <span className="text-white font-bold text-xl">G</span>
+        <div className="flex items-center gap-2 group cursor-pointer">
+          <div className="relative flex items-start justify-center h-10 w-14 overflow-hidden group-hover:scale-105 transition-transform duration-300">
+            <img 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnd3zleee2ACYHTY5nZAPyw-CeAfPsNJy9DvdEEvCYOWWporGB77T2ugQGE4blQ0pae-t0K3R1Ami3uyG1bo85bdfpdj4qw71L5j5vlEupdKJ63i9hfINNrm8sztcV1EHxC8w_doXccb4KnO8zPUWqe3ks2yl1QhnVierZqIgDRk-URWKlPIb6IKtEjScgZTOEpAMJn-VGFcR_QXcf0zwInmVnM2wF3QTS6o5ooBXL3-Moo_A83yqsxYnqCk0UVdXTi1NTg_ikC7o" 
+              alt="Genifit Logo" 
+              className="w-full h-auto object-top -mt-1"
+            />
           </div>
           <div className="flex flex-col">
-            <span className={`text-xl font-black tracking-wider transition-colors duration-300 ${
+            <span className={`text-2xl font-black tracking-wider transition-colors duration-300 ${
               scrolled ? "text-primary" : "text-emerald-600"
             }`}>
-              GeneFit
+              GENIFIT
             </span>
           </div>
         </div>
@@ -93,7 +98,9 @@ const Header: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          <button className={`px-5 py-2 text-sm font-semibold rounded-full border transition-all duration-300 cursor-pointer ${
+          <button 
+            onClick={() => navigate(AUTH_ROUTE.ADMIN_LOGIN)}
+            className={`px-5 py-2 text-sm font-semibold rounded-full border transition-all duration-300 cursor-pointer ${
             scrolled
               ? "border-gray-300 text-gray-700 hover:bg-gray-50"
               : "border-transparent text-gray-600 hover:bg-gray-100"

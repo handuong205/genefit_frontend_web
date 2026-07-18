@@ -10,9 +10,7 @@ const PublicLayout = (props: PublicLayoutProps) => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-6 py-8 mt-16 md:mt-8">
-          {props.children}
-        </div>
+        {props.children}
       </main>
       <Footer />
     </div>

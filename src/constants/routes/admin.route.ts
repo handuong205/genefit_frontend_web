@@ -5,4 +5,6 @@ export const ADMIN_ROUTE = {
     SETTINGS: '/admin/settings',
     FOODS: '/admin/foods',
     SUBSCRIPTIONS: '/admin/subscriptions',
+    USER_PROFILE: '/admin/users/:userId',
+    PAYMENTS: '/admin/payments',
 }
