@@ -6,8 +6,8 @@ import type { User } from "./models/User.model";
 import { getUsersService, searchUsersService } from "./services/getUsers.service";
 import { deleteUserService } from "./services/deleteUser.service";
 import { toast } from "react-toastify";
-import UserProfileModal from "./Users.page.profile";
-import UserEditModal from "./Users.modal.edit";
+import UserProfileModal from "./models/Users.page.profile";
+import UserEditModal from "./models/Users.modal.edit";
 
 const columns: Column<User>[] = [
   {
@@ -66,7 +66,7 @@ const UsersPage = () => {
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  
+
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [selectedProfileUserId, setSelectedProfileUserId] = useState<number | null>(null);
 
@@ -176,7 +176,7 @@ const UsersPage = () => {
           onClose={() => setIsDeleteOpen(false)}
           title="Xác nhận hủy kích hoạt"
           onConfirm={handleDeleteConfirm}
-          type="delete" 
+          type="delete"
           message="Bạn có chắc chắn muốn hủy kích hoạt người dùng này không? Người dùng sẽ không thể đăng nhập sau khi bị hủy kích hoạt."
           isLoading={isTableLoading}
         />

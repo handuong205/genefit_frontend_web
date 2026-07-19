@@ -3,14 +3,26 @@ export interface User {
   username: string;
   email: string;
   role: string;
+  createdAt?: string;
   userProfile?: {
-    heightCm: number;
-    weightKg: number;
-    age: number;
-    gender: string;
-    goal: string;
-    baseTargetCalorie: number;
-    activityLevel: string;
-    targetWeightKg: number;
+    heightCm?: number;
+    weightKg?: number;
+    age?: number;
+    firstName?: string;
+    lastName?: string;
+    dateOfBirth?: string;
+    occupation?: string;
+    gender?: string;
+    goal?: string;
+    activityLevel?: string;
+    targetWeightKg?: number;
+    baseTargetCalorie?: number;
+    initialWeight?: number;
+    targetDate?: string;
+    goalStartDate?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    medicalConditions?: string[];
+    allergies?: string[];
   };
 }

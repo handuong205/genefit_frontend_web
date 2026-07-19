@@ -223,7 +223,7 @@ const SubscriptionPage = () => {
   return (
     <>
       <CRUDPageTemplate<SubscriptionPlan>
-        title="Quan ly goi dang ky"
+        title="Quản lý gói đăng ký"
         rowKey="planId"
         columns={columns}
         data={plans || []}
