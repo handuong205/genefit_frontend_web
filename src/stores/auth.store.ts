@@ -3,7 +3,24 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import type { JwtPayload } from "../utils/jwt";
 import { LogoutService } from "../services/auth/logout.service";
 
-type AuthUser = JwtPayload | (Record<string, unknown> & { roles?: unknown[] });
+export type AuthUserProfile = {
+  firstName?: string | null;
+  lastName?: string | null;
+  avatarUrl?: string | null;
+};
+
+export type AuthUser = Partial<JwtPayload> &
+  Record<string, unknown> & {
+    userId?: number;
+    username?: string | null;
+    email?: string | null;
+    name?: string | null;
+    fullName?: string | null;
+    avatarUrl?: string | null;
+    userProfile?: AuthUserProfile | null;
+    role?: unknown;
+    roles?: unknown[];
+  };
 
 type AuthState = {
   user: AuthUser | null;
@@ -22,6 +39,7 @@ type AuthState = {
     token: string,
     refreshToken: string | null,
   ) => void;
+  setUser: (user: AuthUser) => void;
   hydrate: () => void;
   clearAuth: () => void;
   setNeedsOnboarding: (value: boolean) => void;
@@ -89,6 +107,10 @@ export const useAuthStore = create<AuthState>()(
           refreshToken,
           isInitialized: true,
         });
+      },
+
+      setUser: (user) => {
+        set({ user: normalizeUser(user) });
       },
 
       hydrate: () => {

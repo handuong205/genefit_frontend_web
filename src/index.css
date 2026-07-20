@@ -187,7 +187,9 @@ code {
   --color-tertiary-container: #82abff;
   --color-surface-variant: #e0e3e5;
   --color-primary-container: #22c55e;
-   --color-primary: #2A9D8F;
+  --color-primary: #009951;
+  --color-primary-hover: #007a41;
+  --color-accent-soft: #dcfce7;
   --color-on-surface-variant: #3d4a3d;
   --color-outline-variant: #bccbb9;
   --color-on-error-container: #93000a;
@@ -238,7 +240,42 @@ code {
   --text-headline-lg--font-weight: 700;
 }
 
+:root {
+  --account-menu-bg: #f5f7fa;
+  --account-menu-text: #111827;
+  --account-menu-muted: #546172;
+  --account-menu-border: rgba(15, 23, 42, 0.08);
+  --account-menu-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  --account-menu-card: rgba(255, 255, 255, 0.86);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --account-menu-bg: #0f172a;
+    --account-menu-text: #f8fafc;
+    --account-menu-muted: #cbd5e1;
+    --account-menu-border: rgba(148, 163, 184, 0.16);
+    --account-menu-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    --account-menu-card: rgba(15, 23, 42, 0.72);
+  }
+}
+
 @layer utilities {
+  .account-menu-surface {
+    background: var(--account-menu-bg);
+    color: var(--account-menu-text);
+    border: 1px solid var(--account-menu-border);
+    box-shadow: var(--account-menu-shadow);
+  }
+
+  .account-menu-card {
+    background: var(--account-menu-card);
+    border: 1px solid var(--account-menu-border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   .shadow-primary {
     box-shadow: 0 4px 14px 0 color-mix(in srgb, var(--color-primary) 25%, transparent);
   }

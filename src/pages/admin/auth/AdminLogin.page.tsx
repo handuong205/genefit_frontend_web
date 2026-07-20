@@ -1,4 +1,4 @@
-import { ArrowLeft, Lock, ShieldCheck, User } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Lock, ShieldCheck, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,10 +16,10 @@ interface LoginFormInputs {
 }
 
 const inputClass =
-  "peer w-full rounded-xl border border-slate-700 bg-slate-950/70 px-12 py-4 text-white outline-none transition placeholder:text-transparent focus:border-primary focus:ring-4 focus:ring-primary/20";
+  "peer w-full rounded-xl border border-slate-200 bg-white px-12 py-4 text-slate-950 outline-none transition placeholder:text-transparent focus:border-primary focus:ring-4 focus:ring-primary/15";
 
 const labelClass =
-  "absolute left-12 top-4 text-sm font-semibold text-slate-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-medium peer-focus:-top-2 peer-focus:bg-slate-950 peer-focus:px-2 peer-focus:text-sm peer-focus:font-semibold peer-focus:text-primary peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:bg-slate-950 peer-[:not(:placeholder-shown)]:px-2 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:font-semibold peer-[:not(:placeholder-shown)]:text-primary";
+  "absolute left-12 top-4 text-sm font-semibold text-slate-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-medium peer-focus:-top-2 peer-focus:bg-white peer-focus:px-2 peer-focus:text-sm peer-focus:font-semibold peer-focus:text-primary peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-2 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:font-semibold peer-[:not(:placeholder-shown)]:text-primary";
 
 const getRole = (scope?: string) => String(scope ?? "").trim().toUpperCase();
 
@@ -27,6 +27,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const loginUser = useAuthStore((state) => state.login);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -80,12 +81,12 @@ const AdminLogin = () => {
   };
 
   return (
-    <section className="flex min-h-screen w-full items-center justify-center bg-slate-950 px-4 py-10">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl shadow-black/40 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="hidden bg-slate-900 p-8 lg:flex lg:flex-col lg:justify-between">
+    <section className="flex min-h-screen w-full items-center justify-center bg-background-light px-4 py-10">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-primary/10 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="hidden bg-primary/10 p-8 lg:flex lg:flex-col lg:justify-between">
           <Link
             to={PUBLIC_ROUTE.HOME}
-            className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white"
+            className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary"
           >
             <ArrowLeft size={16} />
             Về trang chủ
@@ -95,22 +96,22 @@ const AdminLogin = () => {
             <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-white">
               <ShieldCheck size={30} />
             </div>
-            <h2 className="text-3xl font-extrabold leading-tight text-white">
+            <h2 className="text-3xl font-extrabold leading-tight text-slate-950">
               Khu vực quản trị Genefit
             </h2>
-            <p className="mt-4 text-sm leading-6 text-slate-400">
+            <p className="mt-4 text-sm leading-6 text-slate-600">
               Tài khoản không có quyền ADMIN sẽ bị từ chối ngay cả khi thông tin đăng nhập hợp lệ.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-              <p className="text-2xl font-black text-white">CMS</p>
-              <p className="mt-1 text-sm text-slate-400">Quản lý dữ liệu</p>
+                <div className="rounded-xl border border-primary/15 bg-white p-4">
+              <p className="text-2xl font-black text-slate-950">CMS</p>
+              <p className="mt-1 text-sm text-slate-500">Quản lý dữ liệu</p>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-              <p className="text-2xl font-black text-white">ADMIN</p>
-              <p className="mt-1 text-sm text-slate-400">Phân quyền riêng</p>
+            <div className="rounded-xl border border-primary/15 bg-white p-4">
+              <p className="text-2xl font-black text-slate-950">ADMIN</p>
+              <p className="mt-1 text-sm text-slate-500">Phân quyền riêng</p>
             </div>
           </div>
         </div>
@@ -120,10 +121,10 @@ const AdminLogin = () => {
             <p className="mb-3 text-sm font-bold uppercase tracking-wider text-primary">
               Admin Access
             </p>
-            <h1 className="text-4xl font-extrabold text-white">
+            <h1 className="text-4xl font-extrabold text-slate-950">
               Đăng nhập Admin
             </h1>
-            <p className="mt-3 max-w-lg text-base leading-7 text-slate-400">
+            <p className="mt-3 max-w-lg text-base leading-7 text-slate-600">
               Sử dụng tài khoản quản trị để truy cập dashboard, người dùng, thực phẩm và giao dịch.
             </p>
           </div>
@@ -159,23 +160,27 @@ const AdminLogin = () => {
               <Lock className="absolute left-4 top-4 z-10 h-5 w-5 text-primary" />
               <input
                 id="admin-password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder=" "
                 {...register("password", {
                   required: "Mật khẩu không được để trống",
-                  minLength: {
-                    value: 6,
-                    message: "Mật khẩu phải có ít nhất 6 ký tự",
-                  },
                 })}
                 className={inputClass}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                className="absolute right-4 top-4 z-10 inline-flex h-6 w-6 items-center justify-center text-slate-500 transition hover:text-primary"
+                aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
               <label htmlFor="admin-password" className={labelClass}>
                 Mật khẩu
               </label>
               {errors.password && (
-                <p className="absolute bottom-0 left-1 text-sm text-red-300">
+                <p className="absolute bottom-0 left-1 text-sm text-error">
                   {errors.password.message}
                 </p>
               )}
@@ -189,12 +194,12 @@ const AdminLogin = () => {
             />
           </form>
 
-          <p className="mt-8 text-sm text-slate-400">
+          {/* <p className="mt-8 text-sm text-slate-600">
             Không phải quản trị viên?{" "}
             <Link to={PUBLIC_ROUTE.LOGIN} className="font-bold text-primary hover:underline">
               Đăng nhập người dùng
             </Link>
-          </p>
+          </p> */}
         </div>
       </div>
     </section>

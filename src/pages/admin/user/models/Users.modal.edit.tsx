@@ -1,4 +1,3 @@
-import React from 'react';
 import { User, Scale, Zap, Info, X, CheckCircle, Edit } from 'lucide-react';
 
 interface UserEditModalProps {

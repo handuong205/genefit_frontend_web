@@ -20,6 +20,10 @@ import PaymentManagementPage from "../pages/admin/payment/Payment.page.history";
 import Verify from "../pages/verify";
 import UserRegisterPage from "../pages/user/auth/UserRegister.page";
 import UserLogin from "../pages/user/auth/ClientAuth";
+import SubscriptionUpgradePage from "../pages/subscription/Subscription.page";
+import ProfilePage from "../pages/profile/Profile.page";
+import ForgotPasswordPage from "../pages/user/auth/ForgotPassword.page";
+
 
 const MainRoute = () => {
   return (
@@ -32,7 +36,8 @@ const MainRoute = () => {
           <Route path={PUBLIC_ROUTE.HOME} element={<HomePage/>} />
           <Route path={PUBLIC_ROUTE.ABOUT} element={<AboutPage />}/>
           <Route path={PUBLIC_ROUTE.VERIFY} element={<Verify />}/>
-          <Route path={PUBLIC_ROUTE.LOGIN} element={<UserLogin />}/>
+          <Route path={PUBLIC_ROUTE.PRICING} element={<SubscriptionUpgradePage />}/>
+          <Route path={PUBLIC_ROUTE.PROFILE} element={<ProfilePage />}/>
           
         </Route>
 
@@ -49,6 +54,8 @@ const MainRoute = () => {
             <Route path={ADMIN_ROUTE.PAYMENTS} element={<PaymentManagementPage />} />
           </Route>
         </Route>
+        <Route path={PUBLIC_ROUTE.LOGIN} element={<UserLogin />}/>
+        <Route path={PUBLIC_ROUTE.FORGOT_PASSWORD} element={<ForgotPasswordPage />}/>
         <Route path={AUTH_ROUTE.ADMIN_LOGIN} element={<AdminLogin />} />
         <Route path={PUBLIC_ROUTE.REGISTER} element={<UserRegisterPage />} />
         <Route path="*" element={<NotFoundPage />} />

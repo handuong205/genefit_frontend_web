@@ -1,13 +1,14 @@
-import { Activity, ArrowRight, Lock, User } from "lucide-react";
+import { Activity, Eye, EyeOff, Lock, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import ButtonSubmit from "../../../components/common/button/Button";
-import { AUTH_ROUTE } from "../../../constants/routes/auth.route";
+
 import { PUBLIC_ROUTE } from "../../../constants/routes/public.route";
-import { useAuthStore } from "../../../stores/auth.store";
+import { useAuthStore, type AuthUser } from "../../../stores/auth.store";
 import { decodeToken } from "../../../utils/jwt";
+import { GetCurrentUserService } from "./services/getCurrentUser.service";
 import { LoginAccountService } from "./services/loginAccount.service";
 
 interface LoginFormInputs {
@@ -27,6 +28,7 @@ const UserLogin = () => {
   const navigate = useNavigate();
   const loginUser = useAuthStore((state) => state.login);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -64,7 +66,23 @@ const UserLogin = () => {
         return;
       }
 
-      loginUser(user, authData.accessToken, authData.refreshToken ?? null);
+      let sessionUser: AuthUser = user;
+
+      try {
+        const currentUser = await GetCurrentUserService(authData.accessToken);
+
+        if (currentUser) {
+          sessionUser = {
+            ...user,
+            ...currentUser,
+            id: currentUser.userId ?? user.id,
+          };
+        }
+      } catch (profileError) {
+        console.warn("Could not load user profile after login:", profileError);
+      }
+
+      loginUser(sessionUser, authData.accessToken, authData.refreshToken ?? null);
       toast.success("Đăng nhập thành công");
       navigate(PUBLIC_ROUTE.HOME);
     } catch (error) {
@@ -80,9 +98,9 @@ const UserLogin = () => {
   };
 
   return (
-    <section className="w-full bg-background-light px-4 py-10 md:px-8">
+    <section className="w-full min-h-screen flex items-center justify-center bg-background-light px-4 py-10 md:px-8">
       <div className="mx-auto grid w-full max-w-6xl overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl shadow-primary/10 lg:grid-cols-[1fr_0.92fr]">
-        <div className="flex min-h-[640px] flex-col justify-center px-6 py-10 sm:px-10 lg:px-14">
+        <div className="flex min-h-160 flex-col justify-center px-6 py-10 sm:px-10 lg:px-14">
           <div className="mb-9">
             <p className="mb-3 text-sm font-bold uppercase tracking-wider text-primary">
               Genefit Member
@@ -126,7 +144,7 @@ const UserLogin = () => {
               <Lock className="absolute left-4 top-4 z-10 h-5 w-5 text-primary" />
               <input
                 id="user-password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder=" "
                 {...register("password", {
@@ -138,6 +156,14 @@ const UserLogin = () => {
                 })}
                 className={inputClass}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                className="absolute right-4 top-4 z-10 inline-flex h-6 w-6 items-center justify-center text-on-surface-variant transition hover:text-primary"
+                aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
               <label htmlFor="user-password" className={labelClass}>
                 Mật khẩu
               </label>
@@ -156,9 +182,9 @@ const UserLogin = () => {
                 />
                 Ghi nhớ đăng nhập
               </label>
-              <a href="#" className="font-semibold text-primary hover:underline">
+              <Link to={PUBLIC_ROUTE.FORGOT_PASSWORD} className="font-semibold text-primary hover:underline">
                 Quên mật khẩu?
-              </a>
+              </Link>
             </div>
 
             <ButtonSubmit
@@ -169,24 +195,17 @@ const UserLogin = () => {
             />
           </form>
 
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 text-sm">
+          <div className="mt-8 flex items-center justify-center gap-4 text-sm">
             <p className="text-on-surface-variant">
               Chưa có tài khoản?{" "}
               <Link to={PUBLIC_ROUTE.REGISTER} className="font-bold text-primary hover:underline">
                 Đăng ký ngay
               </Link>
             </p>
-            <Link
-              to={AUTH_ROUTE.ADMIN_LOGIN}
-              className="inline-flex items-center gap-2 font-bold text-on-surface hover:text-primary"
-            >
-              Trang quản trị
-              <ArrowRight size={16} />
-            </Link>
           </div>
         </div>
 
-        <div className="relative hidden min-h-[640px] overflow-hidden bg-primary lg:block">
+        <div className="relative hidden min-h-160 overflow-hidden bg-primary lg:block">
           <img
             src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80"
             alt="Bữa ăn lành mạnh"

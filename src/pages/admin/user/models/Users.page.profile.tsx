@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import UserEditModal from './Users.modal.edit';
 import { getUserByIdService } from '../services/getUsers.service';
 import { deleteUserService } from '../services/deleteUser.service';
 import type { User as UserModel } from './User.model';
 import { ActionConfirmModal } from '../../../../components/template/ActionConfirmModal';
 import { toast } from 'react-toastify';
-import { X, Eye } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface UserProfileModalProps {
     isOpen: boolean;
@@ -14,7 +15,7 @@ interface UserProfileModalProps {
     onRefreshList?: () => void;
 }
 
-const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, userId, onRefreshList }) => {
+const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, userId, onRefreshList }) => {
     const [user, setUser] = useState<UserModel | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);

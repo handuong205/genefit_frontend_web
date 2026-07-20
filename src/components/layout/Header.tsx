@@ -1,6 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { PUBLIC_ROUTE } from "../../constants/routes/public.route";
+import { GetCurrentUserService } from "../../pages/user/auth/services/getCurrentUser.service";
+import {
+  getMySubscription,
+  type MySubscription,
+} from "../../pages/subscription/services/subscriptionPricing.service";
+import { useAuthStore } from "../../stores/auth.store";
+import UserProfileDropdown from "./UserProfileDropdown";
 
 interface IMenuItem {
   name: string;
@@ -18,6 +26,14 @@ const Header = () => {
   const [activeNav, setActiveNav] = useState<string>(PUBLIC_ROUTE.HOME);
   const [scrolled, setScrolled] = useState<boolean>(false);
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+  const setUser = useAuthStore((state) => state.setUser);
+  const logout = useAuthStore((state) => state.logout);
+  const didSyncProfile = useRef(false);
+  const didSyncSubscription = useRef(false);
+  const [currentSubscription, setCurrentSubscription] =
+    useState<MySubscription | null>(null);
 
   useEffect(() => {
     const checkScrollPosition = () => {
@@ -32,9 +48,75 @@ const Header = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const syncCurrentUser = async () => {
+      if (!token || !user || didSyncProfile.current) {
+        return;
+      }
+
+      didSyncProfile.current = true;
+
+      try {
+        const currentUser = await GetCurrentUserService(token);
+
+        if (currentUser) {
+          setUser({
+            ...user,
+            ...currentUser,
+            id: currentUser.userId ?? user.id,
+          });
+        }
+      } catch (error) {
+        console.warn("Could not sync current user profile in header:", error);
+      }
+    };
+
+    void syncCurrentUser();
+  }, [setUser, token, user]);
+
+  useEffect(() => {
+    const syncCurrentSubscription = async () => {
+      if (!token || !user || didSyncSubscription.current) {
+        return;
+      }
+
+      didSyncSubscription.current = true;
+
+      try {
+        const subscription = await getMySubscription(token);
+        setCurrentSubscription(subscription);
+      } catch (error) {
+        setCurrentSubscription(null);
+        console.warn("Could not sync current subscription in header:", error);
+      }
+    };
+
+    if (!token || !user) {
+      didSyncSubscription.current = false;
+      setCurrentSubscription(null);
+      return;
+    }
+
+    void syncCurrentSubscription();
+  }, [token, user]);
+
   const goTo = (path: string) => {
     setActiveNav(path);
     navigate(path);
+  };
+
+  const handleManageAccount = () => {
+    navigate(PUBLIC_ROUTE.PROFILE);
+  };
+
+  const handleManageSubscription = () => {
+    navigate(PUBLIC_ROUTE.PRICING);
+  };
+
+  const handleSignOut = async () => {
+    await logout();
+    toast.success("Đăng xuất thành công");
+    navigate(PUBLIC_ROUTE.HOME);
   };
 
   return (
@@ -89,25 +171,37 @@ const Header = () => {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => navigate(PUBLIC_ROUTE.LOGIN)}
-            className={`px-5 py-2 text-sm font-semibold rounded-full border transition-all duration-300 cursor-pointer ${
-              scrolled
-                ? "border-gray-300 text-gray-700 hover:bg-gray-50"
-                : "border-transparent text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            Đăng nhập
-          </button>
+          {user ? (
+            <UserProfileDropdown
+              user={user}
+              currentSubscription={currentSubscription}
+              onManageAccount={handleManageAccount}
+              onManageSubscription={handleManageSubscription}
+              onSignOut={handleSignOut}
+            />
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate(PUBLIC_ROUTE.LOGIN)}
+                className={`px-5 py-2 text-sm font-semibold rounded-full border transition-all duration-300 cursor-pointer ${
+                  scrolled
+                    ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    : "border-transparent text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                Đăng nhập
+              </button>
 
-          <button
-            type="button"
-            onClick={() => navigate(PUBLIC_ROUTE.REGISTER)}
-            className="px-5 py-2 text-sm font-semibold bg-primary text-white rounded-full shadow-sm hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer"
-          >
-            Bắt đầu
-          </button>
+              <button
+                type="button"
+                onClick={() => navigate(PUBLIC_ROUTE.REGISTER)}
+                className="px-5 py-2 text-sm font-semibold bg-primary text-white rounded-full shadow-sm hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-lg transition-all duration-300 cursor-pointer"
+              >
+                Bắt đầu
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

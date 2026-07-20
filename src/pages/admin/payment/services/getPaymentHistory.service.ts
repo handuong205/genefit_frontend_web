@@ -28,7 +28,11 @@ export const getPaymentHistoryService = async (cursor?: number, pageSize: number
             url: url,
         });
 
-        return response;
+        return response ?? {
+            transactions: [],
+            nextCursor: null,
+            hasMore: false,
+        };
     } catch (error) {
         console.error("Error in getPaymentHistoryService:", error);
         throw error;

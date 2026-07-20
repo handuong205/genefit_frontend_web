@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { CRUDPageTemplate, type Column } from "../../../components/template/CRUDTemplate"
 import { ActionConfirmModal } from "../../../components/template/ActionConfirmModal";
 import type { User } from "./models/User.model";
@@ -61,7 +60,6 @@ const columns: Column<User>[] = [
 ];
 
 const UsersPage = () => {
-  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);

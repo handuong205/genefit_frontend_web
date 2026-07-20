@@ -20,7 +20,7 @@ const FoodsPage = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
+    const [, setIsLoading] = useState(false);
     const [isTableLoading, setIsTableLoading] = useState(false);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [formMode, setFormMode] = useState<"create" | "edit" | "view">(

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CRUDPageTemplate, type Column } from "../../../components/template/CRUDTemplate";
 import { getPaymentHistoryService, type PaymentHistoryDto } from './services/getPaymentHistory.service';
 import { toast } from 'react-toastify';
