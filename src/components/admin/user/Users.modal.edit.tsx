@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { User, Scale, Zap, Info, X, CheckCircle, Edit } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { User, Scale, Zap, Info, X, Camera } from 'lucide-react';
 import type { User as UserModel } from '../../../pages/admin/user/models/User.model';
 import { toast } from 'react-toastify';
 import { axiosClient } from '../../../api/axios.config';
 import { getUserByIdService } from '../../../pages/admin/user/services/getUsers.service';
+
+// Cloudinary config lấy trực tiếp từ biến môi trường Vite
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 interface UserEditModalProps {
     isOpen: boolean;
@@ -22,10 +26,15 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
         gender: 'MALE',
         goal: 'MAINTAIN_WEIGHT',
         activityLevel: 'SEDENTARY',
-        targetWeightKg: '' as number | string
+        targetWeightKg: '' as number | string,
+        medicalConditions: '',
+        allergies: ''
     });
 
     const [isLoading, setIsLoading] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState('');
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const avatarInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -44,8 +53,11 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
                             gender: fullUser.userProfile.gender || 'MALE',
                             goal: fullUser.userProfile.goal || 'MAINTAIN_WEIGHT',
                             activityLevel: fullUser.userProfile.activityLevel || 'SEDENTARY',
-                            targetWeightKg: fullUser.userProfile.targetWeightKg || ''
+                            targetWeightKg: fullUser.userProfile.targetWeightKg || '',
+                            medicalConditions: fullUser.userProfile.medicalConditions?.join(', ') || '',
+                            allergies: fullUser.userProfile.allergies?.join(', ') || ''
                         });
+                        setAvatarUrl(fullUser.userProfile.avatarUrl || '');
                     } else {
                         setFormData({
                             firstName: '',
@@ -57,8 +69,11 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
                             gender: 'MALE',
                             goal: 'MAINTAIN_WEIGHT',
                             activityLevel: 'SEDENTARY',
-                            targetWeightKg: ''
+                            targetWeightKg: '',
+                            medicalConditions: '',
+                            allergies: ''
                         });
+                        setAvatarUrl('');
                     }
                 } catch (error) {
                     console.error("Failed to fetch full user details", error);
@@ -66,7 +81,6 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
                     setIsLoading(false);
                 }
             } else if (!isOpen) {
-                // Reset form when closed
                 setFormData({
                     firstName: '',
                     lastName: '',
@@ -77,8 +91,11 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
                     gender: 'MALE',
                     goal: 'MAINTAIN_WEIGHT',
                     activityLevel: 'SEDENTARY',
-                    targetWeightKg: ''
+                    targetWeightKg: '',
+                    medicalConditions: '',
+                    allergies: ''
                 });
+                setAvatarUrl('');
             }
         };
         fetchUserData();
@@ -94,6 +111,74 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
         }));
     };
 
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate
+        if (!file.type.startsWith('image/')) {
+            toast.error('Vui lòng chọn file ảnh!');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Ảnh phải nhỏ hơn 5MB!');
+            return;
+        }
+
+        // Hiện preview ngay lập tức từ local file
+        const localPreviewUrl = URL.createObjectURL(file);
+        setAvatarUrl(localPreviewUrl);
+
+        setIsUploadingAvatar(true);
+        try {
+            const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+            console.log('Uploading to:', cloudinaryUrl);
+            console.log('Cloud name:', CLOUD_NAME, 'Upload preset:', UPLOAD_PRESET);
+
+            const uploadData = new FormData();
+            uploadData.append('file', file);
+            uploadData.append('upload_preset', UPLOAD_PRESET);
+
+            const cloudRes = await fetch(cloudinaryUrl, {
+                method: 'POST',
+                body: uploadData,
+            });
+            const cloudData = await cloudRes.json();
+            console.log('Cloudinary response:', cloudData);
+
+            if (cloudData.error) {
+                toast.error(`Cloudinary lỗi: ${cloudData.error.message}`);
+                setAvatarUrl(''); // reset về trống nếu lỗi
+                return;
+            }
+
+            if (!cloudData.secure_url) {
+                toast.error('Tải ảnh lên thất bại!');
+                return;
+            }
+
+            const newAvatarUrl: string = cloudData.secure_url;
+            // Cập nhật preview bằng URL từ Cloudinary
+            setAvatarUrl(newAvatarUrl);
+
+            // Lưu URL vào backend
+            if (user?.userId) {
+                await axiosClient.put(`/api/admin/users/${user.userId}/avatar`, {
+                    avatarUrl: newAvatarUrl
+                });
+            }
+            toast.success('Cập nhật ảnh đại diện thành công!');
+        } catch (error) {
+            console.error('Avatar upload error:', error);
+            toast.error('Lỗi khi cập nhật ảnh đại diện!');
+            setAvatarUrl(''); // reset
+        } finally {
+            setIsUploadingAvatar(false);
+            URL.revokeObjectURL(localPreviewUrl); // cleanup
+            if (avatarInputRef.current) avatarInputRef.current.value = '';
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -106,6 +191,8 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
                 weightKg: formData.weightKg === '' ? null : Number(formData.weightKg),
                 age: formData.age === '' ? null : Number(formData.age),
                 targetWeightKg: formData.targetWeightKg === '' ? null : Number(formData.targetWeightKg),
+                medicalConditions: formData.medicalConditions ? formData.medicalConditions.split(',').map(s => s.trim()).filter(Boolean) : [],
+                allergies: formData.allergies ? formData.allergies.split(',').map(s => s.trim()).filter(Boolean) : [],
             };
 
             await axiosClient.put(`/api/admin/users/${user?.userId}/profile`, payload);
@@ -130,14 +217,50 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
                 className="relative bg-surface-container-lowest w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[95vh] border border-outline-variant overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
-                <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                    <h2 className="text-xl font-bold text-gray-800 uppercase flex items-center gap-2">
-                        {/* <Edit className="w-5 h-5 text-primary" /> */}
-                        Chỉnh sửa người dùng
-                    </h2>
+                {/* Header with Avatar */}
+                <div className="flex-none p-6 border-b border-outline-variant bg-surface-container-low flex justify-between items-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent z-0"></div>
+                    <div className="relative z-10 flex items-center gap-4">
+                        {/* Avatar upload area */}
+                        <div className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
+                            {avatarUrl ? (
+                                <img
+                                    src={avatarUrl}
+                                    alt="Avatar"
+                                    className="w-16 h-16 rounded-full object-cover border-2 border-primary shadow-md"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-2xl border-2 border-primary shadow-md">
+                                    {user?.username?.substring(0, 2).toUpperCase() || 'U'}
+                                </div>
+                            )}
+                            {/* Hover overlay */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                {isUploadingAvatar ? (
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <Camera className="w-6 h-6" />
+                                )}
+                            </div>
+                            {/* Hidden file input */}
+                            <input
+                                ref={avatarInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleAvatarUpload}
+                                disabled={isUploadingAvatar}
+                            />
+                        </div>
+                        <div>
+                            <h2 className="font-headline-sm text-on-surface font-bold">Chỉnh sửa người dùng</h2>
+                            <p className="text-sm text-on-surface-variant mt-0.5">
+                                {isUploadingAvatar ? 'Đang tải ảnh lên...' : 'Nhấn vào ảnh để thay đổi ảnh đại diện'}
+                            </p>
+                        </div>
+                    </div>
                     <button
-                        className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="relative z-10 cursor-pointer p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-colors"
                         onClick={onClose}
                         title="Đóng"
                         type="button"
@@ -232,6 +355,24 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Section 4: Medical Information */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-primary border-b border-primary/10 pb-2">
+                            <Info className="w-5 h-5" />
+                            <h3 className="font-label-md uppercase tracking-wider text-xs">Thông tin Y tế</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <label className="font-label-md text-on-surface-variant block">Bệnh nền (ngăn cách bằng dấu phẩy)</label>
+                                <input name="medicalConditions" value={formData.medicalConditions} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md" placeholder="VD: Huyết áp cao, Tiểu đường" type="text" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="font-label-md text-on-surface-variant block">Dị ứng (ngăn cách bằng dấu phẩy)</label>
+                                <input name="allergies" value={formData.allergies} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-body-md" placeholder="VD: Đậu phộng, Hải sản" type="text" />
+                            </div>
+                        </div>
+                    </div>
                 </form>
 
                 {/* Footer Actions */}
@@ -250,7 +391,6 @@ const UserEditModal = ({ isOpen, onClose, user }: UserEditModalProps) => {
                         type="submit"
                         disabled={isLoading}
                     >
-                        {/* <CheckCircle className="w-4 h-4" /> */}
                         {isLoading ? 'Đang lưu...' : 'Cập nhật'}
                     </button>
                 </div>

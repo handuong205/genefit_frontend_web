@@ -72,11 +72,11 @@ const SubscriptionPage = () => {
         ...toPlanRequest(item),
         active: !item.active,
       });
-      toast.success("Cap nhat trang thai goi thanh cong!");
+      toast.success("Cập nhật trạng thái thành công!");
       fetchPlans(page, "table");
     } catch (error) {
       console.error("Error updating subscription status:", error);
-      toast.error("Co loi xay ra, vui long thu lai.");
+      toast.error("Có lỗi xảy ra, vui lòng thử lại.");
     } finally {
       setIsTableLoading(false);
     }

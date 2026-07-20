@@ -3,7 +3,7 @@ import type { UpdatePlanRequest } from "../models/updateSubscription.model";
 
 export const createPlanService = async (body: UpdatePlanRequest) => {
     try{
-        const res = await axiosClient.post(`/api/subscription-plans`, body);
+        const res = await axiosClient.post(`/api/subscriptions/plans`, body);
         if(res.status === 200 || res.status === 201){
             return res.data;
         }

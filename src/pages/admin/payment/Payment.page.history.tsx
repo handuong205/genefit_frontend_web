@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CRUDPageTemplate, type Column } from "../../../components/template/CRUDTemplate";
 import { getPaymentHistoryService, type PaymentHistoryDto } from './services/getPaymentHistory.service';
 import { toast } from 'react-toastify';
+import PaymentProfileModal from '../../../components/admin/payment/payment.modal.profile';
 
 const columns: Column<PaymentHistoryDto>[] = [
     {
@@ -19,13 +20,13 @@ const columns: Column<PaymentHistoryDto>[] = [
     },
     {
         header: 'Khách Hàng',
-        accessor: 'orderCode', // Temporary since backend doesn't return user details for this API yet
-        sortable: false,
-        render: () => {
+        accessor: 'username',
+        sortable: true,
+        render: (item) => {
             return (
                 <div>
-                    <div className="text-on-surface font-medium italic text-on-surface-variant/70">Dữ liệu cá nhân</div>
-                    <div className="text-on-surface-variant text-[12px] italic">Không hiển thị từ API</div>
+                    <div className="text-on-surface font-medium">{item.username || 'Không xác định'}</div>
+                    <div className="text-on-surface-variant text-[12px]">{item.email || ''}</div>
                 </div>
             );
         }
@@ -95,6 +96,15 @@ const PaymentManagementPage = () => {
     const [transactions, setTransactions] = useState<PaymentHistoryDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [originalData, setOriginalData] = useState<PaymentHistoryDto[]>([]);
+    
+    // Modal state
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState<PaymentHistoryDto | null>(null);
+
+    const handleView = (item: PaymentHistoryDto) => {
+        setSelectedTransaction(item);
+        setIsViewModalOpen(true);
+    };
 
     const fetchTransactions = async () => {
         setIsLoading(true);
@@ -129,7 +139,9 @@ const PaymentManagementPage = () => {
             const keyword = searchTerm.toLowerCase();
             filtered = filtered.filter(t => 
                 (t.orderCode && t.orderCode.toLowerCase().includes(keyword)) || 
-                (t.planName && t.planName.toLowerCase().includes(keyword))
+                (t.planName && t.planName.toLowerCase().includes(keyword)) ||
+                (t.username && t.username.toLowerCase().includes(keyword)) ||
+                (t.email && t.email.toLowerCase().includes(keyword))
             );
         }
         if (filters?.status) {
@@ -147,28 +159,34 @@ const PaymentManagementPage = () => {
     };
 
     return (
-        <CRUDPageTemplate<PaymentHistoryDto>
-            title="Quản Lý Giao Dịch"
-            columns={columns}
-            data={transactions}
-            rowKey="transactionId"
-            isTableLoading={isLoading}
-            onSearch={handleSearch}
-            onView={(item) => console.log('View', item)}
-            onDelete={(item) => console.log('Delete', item)}
-            onRefresh={fetchTransactions}
-            filters={[
-                {
-                    key: "status",
-                    label: "Trạng thái",
-                    options: [
-                        { value: "SUCCESS", label: "Thành công" },
-                        { value: "PENDING", label: "Đang xử lý" },
-                        { value: "FAILED", label: "Thất bại" }
-                    ]
-                }
-            ]}
-        />
+        <>
+            <CRUDPageTemplate<PaymentHistoryDto>
+                title="Quản Lý Giao Dịch"
+                columns={columns}
+                data={transactions}
+                rowKey="transactionId"
+                isTableLoading={isLoading}
+                onSearch={handleSearch}
+                onView={handleView}
+                onRefresh={fetchTransactions}
+                filters={[
+                    {
+                        key: "status",
+                        label: "Trạng thái",
+                        options: [
+                            { value: "SUCCESS", label: "Thành công" },
+                            { value: "PENDING", label: "Đang xử lý" },
+                            { value: "FAILED", label: "Thất bại" }
+                        ]
+                    }
+                ]}
+            />
+            <PaymentProfileModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                transaction={selectedTransaction}
+            />
+        </>
     );
 };
 

@@ -10,10 +10,23 @@ export type SearchPlansRequest = {
 }
 
 export const searchPlanService = async (body: SearchPlansRequest) => {
-    try{
-        const res = await axiosClient.post(`/api/subscription-plans/get-all`, body);
-        if(res.status === 200){
-            return res.data;
+    try {
+        const res = await axiosClient.get(`/api/subscriptions/plans`, {
+            params: {
+                pageNum: body.pageInfo?.pageNum || 1,
+                pageSize: body.pageInfo?.pageSize || 10
+            }
+        });
+        if (res.status === 200) {
+            const apiRes = res.data;
+            return {
+                content: apiRes.data,
+                pageInfo: {
+                    pageNum: apiRes.pagination?.pageNum,
+                    pageSize: apiRes.pagination?.pageSize,
+                    totalItem: apiRes.pagination?.totalItems
+                }
+            };
         }
     }catch(error :any){
         console.log("ERROR", error);

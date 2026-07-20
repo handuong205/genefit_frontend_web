@@ -659,7 +659,7 @@ export function CRUDPageTemplate<T>({
                             </button>
                           )}
 
-                          {!Boolean((item as any).isDeleted) && onDelete && (
+                          {!isInactiveOrDeleted && onDelete && (
                             <button
                               title="Xóa"
                               onClick={() => onDelete(item)}

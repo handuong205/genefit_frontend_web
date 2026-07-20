@@ -101,7 +101,7 @@ const DashboardPage = () => {
       {/* Header matching CRUDPageTemplate */}
       <div className="px-8 py-3 border-b border-gray-200 flex flex-col sm:flex-row sm:flex-nowrap sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 uppercase">Tổng quan hoạt động</h2>
+          <h2 className="text-xl font-bold text-gray-800 uppercase">Tổng quan</h2>
         </div>
       </div>
 
@@ -256,15 +256,8 @@ const DashboardPage = () => {
                   {data.recentTransactions.length > 0 ? (
                     data.recentTransactions.map((tx) => (
                       <tr key={tx.transactionId} className="border-b border-surface-container-lowest hover:bg-surface-container/50 transition-colors">
-                        <td className="py-3 flex items-center gap-3">
-                          {tx.userAvatar ? (
-                            <img src={tx.userAvatar} alt="avatar" className="w-8 h-8 rounded-full object-cover" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-sm">
-                              {tx.userName.substring(0, 2).toUpperCase()}
-                            </div>
-                          )}
-                          <span className="">{tx.userName}</span>
+                        <td className="py-3">
+                          <span className="font-medium text-on-surface">{tx.userName}</span>
                         </td>
                         <td className="py-3 font-semibold">{formatCurrencyVND(tx.amount)}</td>
                         <td className="py-3">

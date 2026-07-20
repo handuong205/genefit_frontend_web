@@ -12,17 +12,6 @@ import UserEditModal from "../../../components/admin/user/Users.modal.edit";
 
 const columns: Column<User>[] = [
   {
-    header: 'ID',
-    accessor: 'userId',
-    sortable: true,
-    className: 'text-center',
-    render: (item) => (
-      <span className={item.isActive === false ? "text-gray-400 opacity-60" : ""}>
-        {item.userId}
-      </span>
-    )
-  },
-  {
     header: 'Tên người dùng',
     accessor: 'username',
     sortable: true,

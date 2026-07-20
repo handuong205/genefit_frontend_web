@@ -9,6 +9,10 @@ export interface PaymentHistoryDto {
     status: string;
     createdAt: string;
     updatedAt: string;
+    userId: number;
+    username: string;
+    email: string;
+    avatarUrl: string | null;
 }
 
 export interface PaymentHistoryResponse {
@@ -19,7 +23,7 @@ export interface PaymentHistoryResponse {
 
 export const getPaymentHistoryService = async (cursor?: number, pageSize: number = 50): Promise<PaymentHistoryResponse> => {
     try {
-        let url = `/api/payment/history?pageSize=${pageSize}`;
+        let url = `/api/admin/payments/history?pageSize=${pageSize}`;
         if (cursor) {
             url += `&cursor=${cursor}`;
         }
@@ -28,7 +32,7 @@ export const getPaymentHistoryService = async (cursor?: number, pageSize: number
             url: url,
         });
 
-        return response;
+        return response as PaymentHistoryResponse;
     } catch (error) {
         console.error("Error in getPaymentHistoryService:", error);
         throw error;

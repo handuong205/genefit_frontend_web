@@ -25,5 +25,15 @@ export interface User {
     updatedAt?: string;
     medicalConditions?: string[];
     allergies?: string[];
+    avatarUrl?: string;
+  };
+  subscription?: {
+    subscriptionId: number;
+    planName: string;
+    planType: string;
+    status: string;
+    startDate: string;
+    endDate: string;
+    autoRenew: boolean;
   };
 }
