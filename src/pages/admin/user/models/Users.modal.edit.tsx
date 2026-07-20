@@ -23,7 +23,7 @@ const UserEditModal = ({ isOpen, onClose }: UserEditModalProps) => {
                 {/* Header */}
                 <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                     <h2 className="text-xl font-bold text-gray-800 uppercase flex items-center gap-2">
-                        <Edit className="w-5 h-5 text-primary" />
+                        {/* <Edit className="w-5 h-5 text-primary" /> */}
                         Chỉnh sửa người dùng
                     </h2>
                     <button 
@@ -143,7 +143,7 @@ const UserEditModal = ({ isOpen, onClose }: UserEditModalProps) => {
                         onClick={onClose}
                         type="button"
                     >
-                        <CheckCircle className="w-4 h-4" />
+                        {/* <CheckCircle className="w-4 h-4" /> */}
                         Cập nhật
                     </button>
                 </div>
