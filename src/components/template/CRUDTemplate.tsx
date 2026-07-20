@@ -624,7 +624,7 @@ export function CRUDPageTemplate<T>({
 
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {!isInactiveOrDeleted && onView && (
+                          {!Boolean((item as any).isDeleted) && onView && (
                             <button
                               title="Xem chi tiết"
                               onClick={() => onView(item)}
@@ -633,9 +633,8 @@ export function CRUDPageTemplate<T>({
                               <Eye className="w-5 h-5" />
                             </button>
                           )}
-                          {/*  */}
 
-                          {!isInactiveOrDeleted &&
+                          {!Boolean((item as any).isDeleted) &&
                             onEdit &&
                             (!canEdit || canEdit(item)) && (
                               <button
@@ -650,7 +649,7 @@ export function CRUDPageTemplate<T>({
                               </button>
                             )}
 
-                          {!isInactiveOrDeleted && onSetting && (
+                          {!Boolean((item as any).isDeleted) && onSetting && (
                             <button
                               title="Cài đặt"
                               onClick={() => onSetting(item)}
@@ -670,7 +669,7 @@ export function CRUDPageTemplate<T>({
                             </button>
                           )}
 
-                          {isInactiveOrDeleted && onRestore && (
+                          {(Boolean((item as any).isDeleted) || (item as any).isActive === false) && onRestore && (
                             <button
                               title="Khôi phục"
                               onClick={() => handleRestore(item)}

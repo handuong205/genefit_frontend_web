@@ -4,25 +4,45 @@ import { ActionConfirmModal } from "../../../components/template/ActionConfirmMo
 import type { User } from "./models/User.model";
 import { getUsersService, searchUsersService } from "./services/getUsers.service";
 import { deleteUserService } from "./services/deleteUser.service";
+import { restoreUserService } from "./services/restoreUser.service";
 import { toast } from "react-toastify";
-import UserProfileModal from "./models/Users.page.profile";
-import UserEditModal from "./models/Users.modal.edit";
+import UserProfileModal from "../../../components/admin/user/Users.page.profile";
+import UserEditModal from "../../../components/admin/user/Users.modal.edit";
 
 const columns: Column<User>[] = [
-  {
-    header: 'ID',
-    accessor: 'userId',
-    sortable: true,
-    className: 'text-center',
-  },
   {
     header: 'Tên người dùng',
     accessor: 'username',
     sortable: true,
+    render(item) {
+      return (
+        <span className={item.isActive === false ? "text-gray-400 opacity-60" : "font-medium"}>
+          {item.username}
+        </span>
+      );
+    }
   },
   {
     header: 'Email',
     accessor: 'email',
+    render(item) {
+      return (
+        <span className={item.isActive === false ? "text-gray-400 opacity-60" : ""}>
+          {item.email}
+        </span>
+      );
+    }
+  },
+  {
+    header: 'Trạng thái',
+    accessor: 'isActive',
+    render(item) {
+      return (
+        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${item.isActive !== false ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200 opacity-60'}`}>
+          {item.isActive !== false ? 'Hoạt động' : 'Đã khóa'}
+        </span>
+      );
+    }
   },
   {
     header: 'Vai trò',
@@ -49,7 +69,7 @@ const columns: Column<User>[] = [
       }
 
       return (
-        <div className={`inline-flex items-center justify-center px-3 py-1 rounded-full border ${bgColor} ${borderColor}`}>
+        <div className={`inline-flex items-center justify-center px-3 py-1 rounded-full border ${bgColor} ${borderColor} ${item.isActive === false ? 'opacity-60 grayscale' : ''}`}>
           <span className={`text-sm font-medium ${textColor}`}>
             {item.role}
           </span>
@@ -63,6 +83,7 @@ const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isTableLoading, setIsTableLoading] = useState(true);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isRestoreOpen, setIsRestoreOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -120,6 +141,27 @@ const UsersPage = () => {
     setIsDeleteOpen(true);
   };
 
+  const handleRestoreOpen = (item: User) => {
+    setSelectedUser(item);
+    setIsRestoreOpen(true);
+  };
+
+  const handleRestoreConfirm = async () => {
+    if (!selectedUser) return;
+    setIsTableLoading(true);
+    try {
+      await restoreUserService(selectedUser.userId);
+      toast.success("Khôi phục tài khoản thành công");
+      setIsRestoreOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error("Error restoring user:", error);
+      toast.error("Không thể khôi phục tài khoản người dùng");
+    } finally {
+      setIsTableLoading(false);
+    }
+  };
+
   const handleDeleteConfirm = async () => {
     if (!selectedUser) return;
     setIsTableLoading(true);
@@ -154,6 +196,7 @@ const UsersPage = () => {
           setIsEditModalOpen(true);
         }}
         onDelete={handleDeleteOpen}
+        onRestore={handleRestoreOpen}
         onRefresh={fetchUsers}
         filters={[
           {
@@ -180,6 +223,18 @@ const UsersPage = () => {
         />
       ) : null}
 
+      {isRestoreOpen ? (
+        <ActionConfirmModal
+          isOpen={isRestoreOpen}
+          onClose={() => setIsRestoreOpen(false)}
+          title="Xác nhận khôi phục tài khoản"
+          onConfirm={handleRestoreConfirm}
+          type="restore"
+          message={`Bạn có chắc chắn muốn khôi phục tài khoản "${selectedUser?.username}" không? Người dùng sẽ có thể đăng nhập lại.`}
+          isLoading={isTableLoading}
+        />
+      ) : null}
+
       <UserProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
@@ -190,6 +245,7 @@ const UsersPage = () => {
       <UserEditModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
+        user={selectedUser}
       />
     </>
   );

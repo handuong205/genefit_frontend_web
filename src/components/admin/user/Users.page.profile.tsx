@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import UserEditModal from './Users.modal.edit';
-import { getUserByIdService } from '../services/getUsers.service';
-import { deleteUserService } from '../services/deleteUser.service';
-import type { User as UserModel } from './User.model';
-import { ActionConfirmModal } from '../../../../components/template/ActionConfirmModal';
+import { getUserByIdService } from '../../../pages/admin/user/services/getUsers.service';
+import { deleteUserService } from '../../../pages/admin/user/services/deleteUser.service';
+import type { User as UserModel } from '../../../pages/admin/user/models/User.model';
+import { ActionConfirmModal } from '../../template/ActionConfirmModal';
 import { toast } from 'react-toastify';
 import { X } from 'lucide-react';
 
@@ -86,7 +86,11 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, userId, 
                             <div className="md:col-span-4 glass-card rounded-xl p-6 border border-outline-variant flex flex-col items-center text-center bg-white shadow-sm">
                                 <div className="relative mb-4">
                                     <div className="w-24 h-24 rounded-full ring-4 ring-primary-container p-1 bg-surface-container">
-                                        <img className="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS0y-K_YHJSnjzFhzzB0ChrbDfKYi5PQc9hmsFZ4bWQpD_PmD3jwoZpQX7P6x6P2nXsV5Zxg-GUIqO6twPdSTSBfaljDiDNFondd-GquNMovyWTmE-uAVFClXLI1M56Pd3mE-fKDn6DcubAfFP0Usqiv-JnG_bD9FXMa_EKbhc44hfvIX0qPgcYHHNTroic8I_O4GFGyzA8dGHBIDkHgyO7HKp_qz4pHZBDBKopMSlNPg_70zwxQ9waKNGoQ6kslUvBd1SSKeawEU" />
+                                        <img 
+                                            className="w-full h-full object-cover rounded-full" 
+                                            src={user?.userProfile?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=random&color=fff&size=128`} 
+                                            alt={user?.username || 'User Avatar'} 
+                                        />
                                     </div>
                                     <div className="absolute bottom-0 right-0 bg-primary text-white p-1 rounded-full border-2 border-white">
                                         <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
@@ -127,9 +131,9 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, userId, 
                                         <div>
                                             <p className="text-xs text-secondary">Giới tính</p>
                                             <p className="text-body-md font-medium">
-                                                {user?.userProfile?.gender === 'FEMALE' || user?.userProfile?.gender === 'female' ? 'Nữ' : 
-                                                 user?.userProfile?.gender === 'MALE' || user?.userProfile?.gender === 'male' ? 'Nam' : 
-                                                 user?.userProfile?.gender || 'N/A'}
+                                                {user?.userProfile?.gender === 'FEMALE' || user?.userProfile?.gender === 'female' ? 'Nữ' :
+                                                    user?.userProfile?.gender === 'MALE' || user?.userProfile?.gender === 'male' ? 'Nam' :
+                                                        user?.userProfile?.gender || 'N/A'}
                                             </p>
                                         </div>
                                         <div>
@@ -172,10 +176,10 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, userId, 
                                     <div className="glass-card rounded-xl p-4 border-l-4 border-primary bg-white shadow-sm">
                                         <h4 className="text-label-sm font-bold text-on-surface mb-3">Mục tiêu hiện tại</h4>
                                         <div className="bg-primary-container/20 p-2 rounded text-xs font-medium text-on-primary-container mb-2">
-                                            {user?.userProfile?.goal === 'LOSS_WEIGHT' || user?.userProfile?.goal === 'loss' ? 'Giảm cân' : 
-                                             user?.userProfile?.goal === 'GAIN_MUSCLE' || user?.userProfile?.goal === 'muscle' ? 'Tăng cơ' : 
-                                             user?.userProfile?.goal === 'MAINTAIN_WEIGHT' || user?.userProfile?.goal === 'maintenance' ? 'Duy trì' : 
-                                             user?.userProfile?.goal || 'Chưa thiết lập mục tiêu'}
+                                            {user?.userProfile?.goal === 'LOSS_WEIGHT' || user?.userProfile?.goal === 'loss' ? 'Giảm cân' :
+                                                user?.userProfile?.goal === 'GAIN_MUSCLE' || user?.userProfile?.goal === 'muscle' ? 'Tăng cơ' :
+                                                    user?.userProfile?.goal === 'MAINTAIN_WEIGHT' || user?.userProfile?.goal === 'maintenance' ? 'Duy trì' :
+                                                        user?.userProfile?.goal || 'Chưa thiết lập mục tiêu'}
                                         </div>
                                         <div className="flex justify-between text-xs mb-1">
                                             <span className="text-secondary">Calo mục tiêu</span>
@@ -190,6 +194,40 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, userId, 
                                             <span className="font-medium">{user?.userProfile?.targetDate ? new Date(user.userProfile.targetDate).toLocaleDateString('vi-VN') : '-'}</span>
                                         </div>
                                     </div>
+                                </div>
+                                
+                                {/* Subscription Information */}
+                                <div className="glass-card rounded-xl p-6 border border-outline-variant bg-white shadow-sm">
+                                    <h4 className="font-label-md text-label-md text-on-surface mb-4 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary">workspace_premium</span> Gói đăng ký hiện tại
+                                    </h4>
+                                    {user?.subscription ? (
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-primary-container/10 p-4 rounded-lg border border-primary-container/30">
+                                            <div>
+                                                <p className="text-xs text-secondary mb-1">Tên gói</p>
+                                                <p className="font-bold text-primary">{user.subscription.planName}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-secondary mb-1">Trạng thái</p>
+                                                <p className="font-medium text-green-600">
+                                                    {user.subscription.status === 'ACTIVE' ? 'Đang hoạt động' : 
+                                                     user.subscription.status === 'CANCELLED' ? 'Đã hủy' : 
+                                                     user.subscription.status === 'EXPIRED' ? 'Đã hết hạn' : 
+                                                     user.subscription.status}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-secondary mb-1">Ngày bắt đầu</p>
+                                                <p className="font-medium">{new Date(user.subscription.startDate).toLocaleDateString('vi-VN')}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-secondary mb-1">Ngày kết thúc</p>
+                                                <p className="font-medium">{new Date(user.subscription.endDate).toLocaleDateString('vi-VN')}</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-secondary italic bg-surface-container p-4 rounded-lg text-center">Người dùng chưa đăng ký gói thành viên nào.</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -206,11 +244,11 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, userId, 
                                         <div>
                                             <p className="text-[10px] text-secondary uppercase">Mức độ hoạt động</p>
                                             <p className="text-sm font-bold">
-                                                {user?.userProfile?.activityLevel === 'SEDENTARY' || user?.userProfile?.activityLevel === 'sedentary' ? 'Ít vận động' : 
-                                                 user?.userProfile?.activityLevel === 'LIGHTLY_ACTIVE' || user?.userProfile?.activityLevel === 'moderate' ? 'Vận động nhẹ' :
-                                                 user?.userProfile?.activityLevel === 'MODERATELY_ACTIVE' || user?.userProfile?.activityLevel === 'active' ? 'Vận động vừa' :
-                                                 user?.userProfile?.activityLevel === 'VERY_ACTIVE' || user?.userProfile?.activityLevel === 'very-active' ? 'Rất năng động' :
-                                                 user?.userProfile?.activityLevel || 'N/A'}
+                                                {user?.userProfile?.activityLevel === 'SEDENTARY' || user?.userProfile?.activityLevel === 'sedentary' ? 'Ít vận động' :
+                                                    user?.userProfile?.activityLevel === 'LIGHTLY_ACTIVE' || user?.userProfile?.activityLevel === 'moderate' ? 'Vận động nhẹ' :
+                                                        user?.userProfile?.activityLevel === 'MODERATELY_ACTIVE' || user?.userProfile?.activityLevel === 'active' ? 'Vận động vừa' :
+                                                            user?.userProfile?.activityLevel === 'VERY_ACTIVE' || user?.userProfile?.activityLevel === 'very-active' ? 'Rất năng động' :
+                                                                user?.userProfile?.activityLevel || 'N/A'}
                                             </p>
                                         </div>
                                     </div>
@@ -221,8 +259,8 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, userId, 
                                         <div>
                                             <p className="text-[10px] text-secondary uppercase">Bệnh nền</p>
                                             <p className="text-sm font-bold">
-                                                {user?.userProfile?.medicalConditions && user.userProfile.medicalConditions.length > 0 
-                                                    ? user.userProfile.medicalConditions.join(', ') 
+                                                {user?.userProfile?.medicalConditions && user.userProfile.medicalConditions.length > 0
+                                                    ? user.userProfile.medicalConditions.join(', ')
                                                     : 'Không có'}
                                             </p>
                                         </div>
@@ -234,8 +272,8 @@ const UserProfileModal: FC<UserProfileModalProps> = ({ isOpen, onClose, userId, 
                                         <div>
                                             <p className="text-[10px] text-secondary uppercase">Dị ứng</p>
                                             <p className="text-sm font-bold">
-                                                {user?.userProfile?.allergies && user.userProfile.allergies.length > 0 
-                                                    ? user.userProfile.allergies.join(', ') 
+                                                {user?.userProfile?.allergies && user.userProfile.allergies.length > 0
+                                                    ? user.userProfile.allergies.join(', ')
                                                     : 'Không có'}
                                             </p>
                                         </div>
