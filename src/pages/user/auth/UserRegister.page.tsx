@@ -1,12 +1,9 @@
-import { Bounds, Center, Environment, OrbitControls, useGLTF } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { ArrowLeft, Lock, Mail, ShieldCheck, User } from "lucide-react";
-import { Suspense, useRef, useState } from "react";
+import { ArrowLeft, CheckCircle2, Lock, Mail, ShieldCheck, User } from "lucide-react";
+import { useRef, useState } from "react";
 import type { ChangeEvent, ClipboardEvent, KeyboardEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import type { Group } from "three";
 import ButtonSubmit from "../../../components/common/button/Button";
 import { PUBLIC_ROUTE } from "../../../constants/routes/public.route";
 import type { RegisterBody } from "./models/registerBody.model";
@@ -32,29 +29,6 @@ const inputClass =
 
 const labelClass =
   "absolute left-5 top-[1.3rem] pt-2 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-base font-medium pointer-events-none transition-all duration-200 bg-gray-50 dark:bg-gray-800 px-2 peer-placeholder-shown:top-[1.3rem] peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0 peer-focus:-top-3 peer-focus:text-base peer-focus:text-primary dark:peer-focus:text-primary peer-focus:bg-background-light dark:peer-focus:bg-background-dark peer-focus:px-2 peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:text-base peer-[:not(:placeholder-shown)]:text-primary dark:peer-[:not(:placeholder-shown)]:text-primary peer-[:not(:placeholder-shown)]:bg-background-light dark:peer-[:not(:placeholder-shown)]:bg-gray-900 peer-[:not(:placeholder-shown)]:px-2";
-
-const registerModelUrl = new URL("../../../assets/3DModels/apple.glb", import.meta.url).href;
-
-const RegisterModel = () => {
-  const modelRef = useRef<Group>(null);
-  const { scene } = useGLTF(registerModelUrl);
-
-  useFrame((_, delta) => {
-    if (modelRef.current) {
-      modelRef.current.rotation.y += delta * 0.35;
-    }
-  });
-
-  return (
-    <group ref={modelRef}>
-      <Center>
-        <primitive object={scene} />
-      </Center>
-    </group>
-  );
-};
-
-useGLTF.preload(registerModelUrl);
 
 const UserRegisterPage = () => {
   const navigate = useNavigate();
@@ -186,23 +160,24 @@ const UserRegisterPage = () => {
     <div className="w-full min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark px-4 py-8">
       <div className="flex w-full max-w-5xl min-h-115 border border-secondary rounded-2xl shadow-2xl bg-background-light dark:bg-background-dark overflow-hidden">
         <div className="hidden lg:flex flex-1 flex-col justify-between bg-primary/10 border-r border-secondary px-8 py-10">
-          <div className="h-[320px] w-full">
-            <Canvas camera={{ position: [0, 0.8, 5], fov: 38 }}>
-              <ambientLight intensity={1.8} />
-              <directionalLight position={[3, 4, 5]} intensity={2.4} />
-              <Suspense fallback={null}>
-                <Bounds fit clip observe margin={1.25}>
-                  <RegisterModel />
-                </Bounds>
-                <Environment preset="city" />
-              </Suspense>
-              <OrbitControls
-                enablePan={false}
-                enableZoom={false}
-                minPolarAngle={Math.PI / 3}
-                maxPolarAngle={Math.PI / 1.8}
-              />
-            </Canvas>
+          <div className="rounded-3xl bg-white/80 p-6 shadow-xl shadow-primary/10">
+            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white">
+              <ShieldCheck size={32} />
+            </div>
+            <h3 className="text-2xl font-bold text-on-surface">
+              Tạo hồ sơ sức khỏe cá nhân
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-on-surface-variant">
+              Sau khi xác thực email, Genefit sẽ giúp bạn lưu mục tiêu, theo dõi bữa ăn và cập nhật tiến độ mỗi ngày.
+            </p>
+            <div className="mt-6 space-y-4">
+              {["Xác thực bằng OTP qua email", "Theo dõi dữ liệu dinh dưỡng", "Cá nhân hóa mục tiêu sức khỏe"].map((item) => (
+                <div key={item} className="flex items-center gap-3 text-sm font-semibold text-on-surface">
+                  <CheckCircle2 size={18} className="text-primary" />
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
           <div className="max-w-sm">
             <p className="text-sm font-semibold text-primary mb-4">

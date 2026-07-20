@@ -1,216 +1,227 @@
-import { Lock, Mail } from "lucide-react";
-import ButtonSubmit from "../../../components/common/button/Button";
-import { useForm } from 'react-hook-form';
-import { useNavigate } from "react-router-dom";
-// import { useState } from "react";
-import { USERS } from "../../../mocks/users";
-import { useAuthStore } from "../../../stores/auth.store";
-import { ADMIN_ROUTE } from "../../../constants/routes/admin.route";
+import { Activity, ArrowRight, Lock, User } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-
-
-
-const UserLogin = () => {
-    const navigate = useNavigate();
-    // const [error, setError] = useState<string>('');
-    const loginUser = useAuthStore((state) => state.login);
+import ButtonSubmit from "../../../components/common/button/Button";
+import { AUTH_ROUTE } from "../../../constants/routes/auth.route";
+import { PUBLIC_ROUTE } from "../../../constants/routes/public.route";
+import { useAuthStore } from "../../../stores/auth.store";
+import { decodeToken } from "../../../utils/jwt";
+import { LoginAccountService } from "./services/loginAccount.service";
 
 interface LoginFormInputs {
-  email: string;
+  username: string;
   password: string;
 }
-    const {
+
+const inputClass =
+  "peer w-full rounded-xl border border-outline-variant bg-white px-12 py-4 text-on-surface outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10";
+
+const labelClass =
+  "absolute left-12 top-4 text-sm font-semibold text-on-surface-variant transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-medium peer-focus:-top-2 peer-focus:bg-white peer-focus:px-2 peer-focus:text-sm peer-focus:font-semibold peer-focus:text-primary peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-2 peer-[:not(:placeholder-shown)]:text-sm peer-[:not(:placeholder-shown)]:font-semibold peer-[:not(:placeholder-shown)]:text-primary";
+
+const getRole = (scope?: string) => String(scope ?? "").trim().toUpperCase();
+
+const UserLogin = () => {
+  const navigate = useNavigate();
+  const loginUser = useAuthStore((state) => state.login);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
     register,
     handleSubmit,
     formState: { errors },
-    setError
+    setError,
   } = useForm<LoginFormInputs>({
-    mode: 'onChange', 
+    mode: "onChange",
   });
 
-    const onSubmit = (data: LoginFormInputs) => {
-      const {email, password} = data;
-      const user = USERS.find((u) => u.email === email);
+  const onSubmit = async ({ username, password }: LoginFormInputs) => {
+    try {
+      setIsSubmitting(true);
+      const response = await LoginAccountService(username.trim(), password);
+      const authData = response.data;
 
-      if (!user) {
-        toast.error("Tài khoản không tồn tại.");
-        setError("email", {
+      if (!response.success || !authData?.accessToken) {
+        toast.error(response.message || "Không thể đăng nhập.");
+        setError("username", {
           type: "manual",
-          message: "Tài khoản không tồn tại!",
-        });
-        return;
-      }
-      if (password !== "123456") {
-        toast.error("Mật khẩu không chính xác.");
-        setError("password", {
-          type: "manual",
-          message: "Mật khẩu không chính xác!",
-        });
-        return;
-      }
-      if (user.role !== "ADMIN") {
-        toast.error("Truy cập bị từ chối.");
-        setError("email", {
-          type: "manual",
-          message: "Truy cập bị từ chối.",
+          message: "Tài khoản hoặc mật khẩu không chính xác.",
         });
         return;
       }
 
-      loginUser(user, user.token);
-      navigate(ADMIN_ROUTE.ADMIN);
+      const user = decodeToken(authData.accessToken);
+      const role = getRole(user.scope);
+
+      if (role === "ADMIN") {
+        toast.error("Tài khoản quản trị không được đăng nhập ở trang người dùng.");
+        setError("username", {
+          type: "manual",
+          message: "Vui lòng dùng trang đăng nhập dành cho quản trị viên.",
+        });
+        return;
+      }
+
+      loginUser(user, authData.accessToken, authData.refreshToken ?? null);
       toast.success("Đăng nhập thành công");
-    };
+      navigate(PUBLIC_ROUTE.HOME);
+    } catch (error) {
+      console.error("User login failed:", error);
+      toast.error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+      setError("username", {
+        type: "manual",
+        message: "Vui lòng kiểm tra lại thông tin đăng nhập.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="w-full h-screen flex items-center justify-center">
-      <div className="flex lg:grid-cols-[280px_1fr] border border-secondary w-3/5 h-4/5 rounded-2xl shadow-2xl bg-background-light dark:bg-background-dark">
-        <div className="flex-1 border-r border-secondary">
-          <div className="text-center mb-15">
-            <h1 className="pt-15 text-4xl font-bold text-gray-900 dark:text-white mb-3">
-              Chào mừng trở lại!
+    <section className="w-full bg-background-light px-4 py-10 md:px-8">
+      <div className="mx-auto grid w-full max-w-6xl overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-2xl shadow-primary/10 lg:grid-cols-[1fr_0.92fr]">
+        <div className="flex min-h-[640px] flex-col justify-center px-6 py-10 sm:px-10 lg:px-14">
+          <div className="mb-9">
+            <p className="mb-3 text-sm font-bold uppercase tracking-wider text-primary">
+              Genefit Member
+            </p>
+            <h1 className="text-4xl font-extrabold text-on-surface">
+              Đăng nhập người dùng
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              Hãy đăng nhập để tiếp tục
+            <p className="mt-3 max-w-lg text-base leading-7 text-on-surface-variant">
+              Tiếp tục theo dõi dinh dưỡng, lịch luyện tập và tiến độ sức khỏe cá nhân.
             </p>
           </div>
-          <form className="px-10 flex-col" method="POST" onSubmit={handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-6">
-              <div className="relative py-2 pb-5 pt-3">
-                <input
-                  id="email"
-                  type="email"
-                  placeholder=" "
-                  {...register("email", {
-                    required: "Email không được để trống",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Email sai định dạng (ví dụ: abc@gmail.com)",
-                    },
-                  })}
-                  className="peer w-full px-5 py-4 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl outline-none transition-all duration-200 
-                focus:border-primary dark:focus:border-primary focus:bg-background-light dark:focus:bg-background-dark focus:shadow-lg focus:shadow-primary/10"
-                />
-                <label
-                  htmlFor="email"
-                  className="absolute left-5 top-[1.3rem] pt-2 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-base font-medium pointer-events-none transition-all duration-200 bg-gray-50 dark:bg-gray-800 px-2
-                peer-placeholder-shown:top-[1.3rem] peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-                peer-focus:-top-3 peer-focus:text-base peer-focus:text-primary dark:peer-focus:text-primary peer-focus:bg-background-light dark:peer-focus:bg-background-dark peer-focus:px-2
-                peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:text-base peer-[:not(:placeholder-shown)]:text-primary dark:peer-[:not(:placeholder-shown)]:text-primary peer-[:not(:placeholder-shown)]:bg-background-light dark:peer-[:not(:placeholder-shown)]:bg-gray-900 peer-[:not(:placeholder-shown)]:px-2"
-                >
-                  <Mail size={18} className="text-current" />
-                  Email
-                </label>
-                {errors.email && (
-                  <p className="absolute -bottom-1 left-2 text-sm text-error pt-2">
-                    {errors.email.message as string}
-                  </p>
-                )}
-              </div>
-              <div className="relative py-2 pb-5 pt-3">
-                <input
-                  id="password"
-                  type="password"
-                  placeholder=" "
-                  {...register("password", {
-                    required: "Mật khẩu không được để trống",
-                    minLength: {
-                      value: 6,
-                      message: "Mật khẩu phải có ít nhất 6 ký tự",
-                    },
-                  })}
-                  className="peer w-full px-5 py-4 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl outline-none transition-all duration-200 
-                focus:border-primary dark:focus:border-primary focus:bg-background-light dark:focus:bg-background-dark focus:shadow-lg focus:shadow-primary/10"
-                />
-                <label
-                  htmlFor="password"
-                  className="absolute left-5 top-[1.3rem] pt-2 flex items-center gap-2 text-gray-500 dark:text-gray-400 text-base font-medium pointer-events-none transition-all duration-200 bg-gray-50 dark:bg-gray-800 px-2
-                peer-placeholder-shown:top-[1.3rem] peer-placeholder-shown:text-base peer-placeholder-shown:bg-transparent peer-placeholder-shown:px-0
-                peer-focus:-top-3 peer-focus:text-base peer-focus:text-primary dark:peer-focus:text-primary peer-focus:bg-background-light dark:peer-focus:bg-background-dark peer-focus:px-2
-                peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:text-base peer-[:not(:placeholder-shown)]:text-primary dark:peer-[:not(:placeholder-shown)]:text-primary peer-[:not(:placeholder-shown)]:bg-background-light dark:peer-[:not(:placeholder-shown)]:bg-gray-900 peer-[:not(:placeholder-shown)]:px-2"
-                >
-                  <Lock size={18} className="text-current" />
-                  Mật khẩu
-                </label>
-                {errors.password && (
-                  <p className="absolute -bottom-1 left-2 text-sm text-error pt-2">
-                    {errors.password.message as string}
-                  </p>
-                )}
-              </div>
+
+          <form method="POST" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="relative pb-5">
+              <User className="absolute left-4 top-4 z-10 h-5 w-5 text-primary" />
+              <input
+                id="user-username"
+                type="text"
+                autoComplete="username"
+                placeholder=" "
+                {...register("username", {
+                  required: "Tên đăng nhập không được để trống",
+                  minLength: {
+                    value: 3,
+                    message: "Tên đăng nhập phải có ít nhất 3 ký tự",
+                  },
+                })}
+                className={inputClass}
+              />
+              <label htmlFor="user-username" className={labelClass}>
+                Tên đăng nhập
+              </label>
+              {errors.username && (
+                <p className="absolute bottom-0 left-1 text-sm text-error">
+                  {errors.username.message}
+                </p>
+              )}
             </div>
 
-            <div className="flex justify-between pt-4">
-              <div className="flex gap-2 pt-3">
+            <div className="relative pb-5">
+              <Lock className="absolute left-4 top-4 z-10 h-5 w-5 text-primary" />
+              <input
+                id="user-password"
+                type="password"
+                autoComplete="current-password"
+                placeholder=" "
+                {...register("password", {
+                  required: "Mật khẩu không được để trống",
+                  minLength: {
+                    value: 6,
+                    message: "Mật khẩu phải có ít nhất 6 ký tự",
+                  },
+                })}
+                className={inputClass}
+              />
+              <label htmlFor="user-password" className={labelClass}>
+                Mật khẩu
+              </label>
+              {errors.password && (
+                <p className="absolute bottom-0 left-1 text-sm text-error">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+              <label className="inline-flex items-center gap-2 text-on-surface-variant">
                 <input
                   type="checkbox"
-                  id="remember"
                   className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
-                <span className="text-sm">Ghi nhớ đăng nhập</span>
-              </div>
-              <div className="text-right mt-2">
-                <a href="#" className="text-sm text-primary hover:underline">
-                  Quên mật khẩu?
-                </a>
-              </div>
+                Ghi nhớ đăng nhập
+              </label>
+              <a href="#" className="font-semibold text-primary hover:underline">
+                Quên mật khẩu?
+              </a>
             </div>
 
-            <ButtonSubmit label="Đăng nhập" className="mt-10" />
+            <ButtonSubmit
+              label="Đăng nhập"
+              icon="arrow_forward"
+              loading={isSubmitting}
+              className="py-4"
+            />
           </form>
-          <div className="relative my-8 ">
-            <div className="absolute inset-0 flex items-center px-10">
-              <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-background-light dark:bg-background-dark text-gray-500 dark:text-gray-400 font-medium">
-                hoặc đăng nhập với
-              </span>
-            </div>
-          </div>
 
-          <div className="flex gap-4 px-10">
-            <button
-              className="flex flex-1 items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl 
-                  hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 hover:shadow-md group"
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 text-sm">
+            <p className="text-on-surface-variant">
+              Chưa có tài khoản?{" "}
+              <Link to={PUBLIC_ROUTE.REGISTER} className="font-bold text-primary hover:underline">
+                Đăng ký ngay
+              </Link>
+            </p>
+            <Link
+              to={AUTH_ROUTE.ADMIN_LOGIN}
+              className="inline-flex items-center gap-2 font-bold text-on-surface hover:text-primary"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Google
-              </span>
-            </button>
-
-            {/* <button className="flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl 
-                  hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 hover:shadow-md group">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Facebook</span>
-                </button> */}
+              Trang quản trị
+              <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
-        <div className="flex-1 items-center justify-center hidden lg:flex">
-            Ảnh hoặc nội dung gì đó nhưng chưa thiết kế
+
+        <div className="relative hidden min-h-[640px] overflow-hidden bg-primary lg:block">
+          <img
+            src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1200&q=80"
+            alt="Bữa ăn lành mạnh"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/95 via-primary/70 to-tertiary/80" />
+          <div className="relative flex h-full flex-col justify-between p-10 text-white">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold backdrop-blur">
+              <Activity size={18} />
+              Theo dõi sức khỏe mỗi ngày
+            </div>
+
+            <div>
+              <h2 className="max-w-md text-4xl font-extrabold leading-tight">
+                Một tài khoản cho dinh dưỡng, luyện tập và tiến độ cá nhân.
+              </h2>
+              <div className="mt-8 grid grid-cols-3 gap-3">
+                <div className="rounded-xl bg-white/15 p-4 backdrop-blur">
+                  <p className="text-2xl font-black">AI</p>
+                  <p className="mt-1 text-sm text-white/80">Gợi ý bữa ăn</p>
+                </div>
+                <div className="rounded-xl bg-white/15 p-4 backdrop-blur">
+                  <p className="text-2xl font-black">24/7</p>
+                  <p className="mt-1 text-sm text-white/80">Theo dõi</p>
+                </div>
+                <div className="rounded-xl bg-white/15 p-4 backdrop-blur">
+                  <p className="text-2xl font-black">1%</p>
+                  <p className="mt-1 text-sm text-white/80">Tốt hơn mỗi ngày</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

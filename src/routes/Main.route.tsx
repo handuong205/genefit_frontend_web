@@ -18,6 +18,7 @@ import SubscriptionPage from "../pages/admin/subscription/Subscription.page";
 import PaymentManagementPage from "../pages/admin/payment/Payment.page.history";
 import Verify from "../pages/verify";
 import UserRegisterPage from "../pages/user/auth/UserRegister.page";
+import UserLogin from "../pages/user/auth/ClientAuth";
 
 const MainRoute = () => {
   return (
@@ -30,6 +31,7 @@ const MainRoute = () => {
           <Route path={PUBLIC_ROUTE.HOME} element={<HomePage/>} />
           <Route path={PUBLIC_ROUTE.ABOUT} element={<AboutPage />}/>
           <Route path={PUBLIC_ROUTE.VERIFY} element={<Verify />}/>
+          <Route path={PUBLIC_ROUTE.LOGIN} element={<UserLogin />}/>
           
         </Route>
 

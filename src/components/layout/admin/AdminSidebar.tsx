@@ -1,23 +1,30 @@
-
-import { Broccoli, ChevronDown, CircleDollarSign, LayoutDashboard, LogOut, PiggyBank, Settings, Users } from 'lucide-react'
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ADMIN_ROUTE } from '../../../constants/routes/admin.route';
-import { useAuthStore } from '../../../stores/auth.store';
-import { AUTH_ROUTE } from '../../../constants/routes/auth.route';
-import { axiosAdminClient } from '../../../api/axios.config';
-import { toast } from 'react-toastify';
-
+import {
+  Broccoli,
+  ChevronDown,
+  CircleDollarSign,
+  LayoutDashboard,
+  LogOut,
+  PiggyBank,
+  Settings,
+  Users,
+} from "lucide-react";
+import { useState } from "react";
+import type { ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { ADMIN_ROUTE } from "../../../constants/routes/admin.route";
+import { AUTH_ROUTE } from "../../../constants/routes/auth.route";
+import { useAuthStore } from "../../../stores/auth.store";
 
 interface NavItem {
-  label: string
-  path: string
-  icon: React.ReactNode
-  badge?: string
-  submenu?: NavItem[]
+  label: string;
+  path: string;
+  icon: ReactNode;
+  badge?: string;
+  submenu?: NavItem[];
 }
 
-const Items: NavItem[] = [
+const items: NavItem[] = [
   {
     label: "Dashboard",
     path: ADMIN_ROUTE.DASHBOARD,
@@ -49,54 +56,36 @@ const Items: NavItem[] = [
     label: "Payment",
     path: ADMIN_ROUTE.PAYMENTS,
     icon: <CircleDollarSign className="w-5 h-5" />,
-  }
+  },
 ];
 
 const bottomNavItems: NavItem[] = [
   {
-    label: 'Settings',
+    label: "Settings",
     path: ADMIN_ROUTE.SETTINGS,
     icon: <Settings className="w-5 h-5" />,
   },
-
-]
-
+];
 
 const AdminSidebar = () => {
-  //   const [isOpen, setIsOpen] = useState(false)
-  const [expandedItems, setExpandedItems] = useState<string[]>([])
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const pathname = useLocation();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const toggleSubmenu = (label: string) => {
-    setExpandedItems((prev) =>
-      prev.includes(label) ? [] : [label]
-    )
-  }
+    setExpandedItems((prev) => (prev.includes(label) ? [] : [label]));
+  };
 
   const isActive = (path: string) => pathname.pathname === path;
 
   const handleLogout = async () => {
-    try {
-      const token = useAuthStore.getState().token;
-      if (token) {
-        await axiosAdminClient.post('/api/auth/logout', {
-          accessToken: token,
-          refreshToken: ""
-        });
-      }
-    } catch (error) {
-      console.error("Logout API failed", error);
-    } finally {
-      useAuthStore.getState().logout();
-      navigate(AUTH_ROUTE.ADMIN_LOGIN);
-      toast.success("Đăng xuất thành công");
-    }
-  }
+    await useAuthStore.getState().logout();
+    navigate(AUTH_ROUTE.ADMIN_LOGIN);
+    toast.success("Đăng xuất thành công");
+  };
 
   return (
     <div className="flex flex-col h-full overflow-auto border-r border-primary rounded-r-2xl shadow-primary-lg">
-      {/* Logo Section */}
       <div className="px-4 py-6 border-b border-primary">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded bg-primary flex items-center justify-center">
@@ -109,60 +98,70 @@ const AdminSidebar = () => {
         </div>
       </div>
 
-      {/* Main Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-2 ">
-        {Items.map((item) => (
+      <nav className="flex-1 px-3 py-6 space-y-2">
+        {items.map((item) => (
           <div key={item.label}>
             {item.submenu ? (
               <>
                 <button
+                  type="button"
                   onClick={() => toggleSubmenu(item.label)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-color cursor-pointer  ${isActive(item.path)
-                    ? "bg-primary text-white"
-                    : "text-black hover:bg-primary hover:text-white"
-                    }`}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-color cursor-pointer ${
+                    isActive(item.path)
+                      ? "bg-primary text-white"
+                      : "text-black hover:bg-primary hover:text-white"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     {item.icon}
                     <span>{item.label}</span>
                   </div>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform ${expandedItems.includes(item.label) ? "rotate-180" : ""
-                      }`}
+                    className={`w-4 h-4 transition-transform ${
+                      expandedItems.includes(item.label) ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
                 <div
-                  className={`grid transition-all duration-300 ease-in-out ${expandedItems.includes(item.label)
-                    ? "grid-rows-[1fr] opacity-100"
-                    : "grid-rows-[0fr] opacity-0"
-                    }`}
+                  className={`grid transition-all duration-300 ease-in-out ${
+                    expandedItems.includes(item.label)
+                      ? "grid-rows-[1fr] opacity-100"
+                      : "grid-rows-[0fr] opacity-0"
+                  }`}
                 >
                   <div className="overflow-hidden">
-                    <div className="mt-2  border-primary pl-3 space-y-2">
+                    <div className="mt-2 border-primary pl-3 space-y-2">
                       {item.submenu.map((subitem) => (
-                        <div
+                        <button
                           key={subitem.label}
+                          type="button"
                           onClick={() => navigate(subitem.path)}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${isActive(subitem.path)
-                            ? "bg-primary/80 text-white"
-                            : "text-black hover:bg-primary/80 hover:text-white"
-                            }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
+                            isActive(subitem.path)
+                              ? "bg-primary/80 text-white"
+                              : "text-black hover:bg-primary/80 hover:text-white"
+                          }`}
                         >
                           {subitem.icon}
                           <span>{subitem.label}</span>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
                 </div>
               </>
             ) : (
-              <div
-                onClick={() => { navigate(item.path); setExpandedItems([]); }}
-                className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors group hover:bg-primary hover:text-white cursor-pointer ${isActive(item.path)
-                  ? "bg-primary text-white"
-                  : "text-black hover:bg-primary hover:text-white"
-                  }`}
+              <button
+                type="button"
+                onClick={() => {
+                  navigate(item.path);
+                  setExpandedItems([]);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors group hover:bg-primary hover:text-white cursor-pointer ${
+                  isActive(item.path)
+                    ? "bg-primary text-white"
+                    : "text-black hover:bg-primary hover:text-white"
+                }`}
               >
                 <div className="flex items-center gap-3">
                   {item.icon}
@@ -173,28 +172,34 @@ const AdminSidebar = () => {
                     {item.badge}
                   </span>
                 )}
-              </div>
+              </button>
             )}
           </div>
         ))}
       </nav>
 
-      {/* Bottom Navigation */}
       <div className="px-3 py-4 border-t border-primary space-y-2">
         {bottomNavItems.map((item) => (
-          <div
+          <button
             key={item.label}
-            onClick={() => { navigate(item.path); setExpandedItems([]); }}
-            className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${isActive(item.path)
-              ? "bg-primary text-white"
-              : "text-black hover:bg-primary hover:text-white"
-              }`}
+            type="button"
+            onClick={() => {
+              navigate(item.path);
+              setExpandedItems([]);
+            }}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+              isActive(item.path)
+                ? "bg-primary text-white"
+                : "text-black hover:bg-primary hover:text-white"
+            }`}
           >
             {item.icon}
             <span>{item.label}</span>
-          </div>
+          </button>
         ))}
-        <button className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer text-error"
+        <button
+          type="button"
+          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer text-error"
           onClick={handleLogout}
         >
           <LogOut className="w-5 h-5" />
@@ -203,6 +208,6 @@ const AdminSidebar = () => {
       </div>
     </div>
   );
-}
+};
 
-export default AdminSidebar
+export default AdminSidebar;

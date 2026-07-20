@@ -1,23 +1,66 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { SESSION_STORAGE } from "../constants/session/sessionstorage.const";
+import type { JwtPayload } from "../utils/jwt";
+import { LogoutService } from "../services/auth/logout.service";
+
+type AuthUser = JwtPayload | (Record<string, unknown> & { roles?: unknown[] });
 
 type AuthState = {
-  user: any;
+  user: AuthUser | null;
   token: string | null;
+  refreshToken: string | null;
   isInitialized: boolean;
-  login: (user: any, token: string | null) => void;
-  setAuth: (user: any, token: string | null) => void;
+  needsOnboarding: boolean;
+  login: (
+    user: AuthUser,
+    token: string,
+    refreshToken: string | null,
+    needsOnboarding?: boolean,
+  ) => void;
+  setAuth: (
+    user: AuthUser,
+    token: string,
+    refreshToken: string | null,
+  ) => void;
   hydrate: () => void;
-  logout: () => void;
+  clearAuth: () => void;
+  setNeedsOnboarding: (value: boolean) => void;
+  logout: () => Promise<void>;
 };
 
-const normalizeRoles = (roles: any[]) => {
-  return roles.map((r) => ({
-    ...r,
-    role: r.role ?? r.role_code,
-    role_code: r.role ?? r.role_code,
-  }));
+const normalizeRoles = (roles: unknown[]) => {
+  return roles.map((role) => {
+    if (!role || typeof role !== "object") {
+      return role;
+    }
+
+    const roleObject = role as Record<string, unknown>;
+
+    return {
+      ...roleObject,
+      role: roleObject.role ?? roleObject.role_code,
+      role_code: roleObject.role ?? roleObject.role_code,
+    };
+  });
+};
+
+const normalizeUser = (user: AuthUser): AuthUser => {
+  if (!("roles" in user) || !Array.isArray(user.roles)) {
+    return user;
+  }
+
+  return {
+    ...user,
+    roles: normalizeRoles(user.roles),
+  };
+};
+
+const clearAuthState = {
+  user: null,
+  token: null,
+  refreshToken: null,
+  isInitialized: true,
+  needsOnboarding: false,
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -25,38 +68,67 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      refreshToken: null,
       isInitialized: false,
+      needsOnboarding: false,
 
-      login: (user, token) => {
-        const normalizedUser = {
-          ...user,
-          roles: normalizeRoles(user.roles || []),
-        };
-
-        set({ user: normalizedUser, token, isInitialized: true });
+      login: (user, token, refreshToken, needsOnboarding = false) => {
+        set({
+          user: normalizeUser(user),
+          token,
+          refreshToken,
+          needsOnboarding,
+          isInitialized: true,
+        });
       },
 
-      setAuth: (user, token) => {
-        const normalizedUser = {
-          ...user,
-          roles: normalizeRoles(user.roles || []),
-        };
-
-        set({ user: normalizedUser, token, isInitialized: true });
+      setAuth: (user, token, refreshToken) => {
+        set({
+          user: normalizeUser(user),
+          token,
+          refreshToken,
+          isInitialized: true,
+        });
       },
 
       hydrate: () => {
         set((state) => ({ ...state, isInitialized: true }));
       },
 
-      logout: () => {
-        set({ user: null, token: null, isInitialized: true });
+      clearAuth: () => {
+        set(clearAuthState);
+      },
+
+      setNeedsOnboarding: (value) => {
+        set({ needsOnboarding: value });
+      },
+
+      logout: async () => {
+        const { token, refreshToken } = useAuthStore.getState();
+
+        try {
+          if (token || refreshToken) {
+            await LogoutService({
+              accessToken: token || "",
+              refreshToken: refreshToken || "",
+            });
+          }
+        } catch (error) {
+          console.warn("Logout API failed, clearing local auth instead:", error);
+        } finally {
+          set(clearAuthState);
+        }
       },
     }),
     {
-      name: SESSION_STORAGE.ACCOUNT_CMS,
+      name: "account_cms",
       storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({ user: state.user, token: state.token }),
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        refreshToken: state.refreshToken,
+        needsOnboarding: state.needsOnboarding,
+      }),
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.isInitialized = true;

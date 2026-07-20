@@ -130,7 +130,7 @@ code {
 }
 
 @theme {
-  --font-sans: 'Arial', 'Helvetica', 'sans-serif';
+  --font-sans: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
 
   /* Existing Colors */
   --color-secondary: #A3B18A;
@@ -187,7 +187,7 @@ code {
   --color-tertiary-container: #82abff;
   --color-surface-variant: #e0e3e5;
   --color-primary-container: #22c55e;
-  --color-primary: #006e2f;
+   --color-primary: #2A9D8F;
   --color-on-surface-variant: #3d4a3d;
   --color-outline-variant: #bccbb9;
   --color-on-error-container: #93000a;
@@ -200,14 +200,14 @@ code {
   --spacing-stack-md: 1rem;
   --spacing-container-margin: 1.5rem;
 
-  --font-label-md: "Inter", sans-serif;
-  --font-headline-lg-mobile: "Inter", sans-serif;
-  --font-headline-md: "Inter", sans-serif;
-  --font-display: "Inter", sans-serif;
-  --font-label-sm: "Inter", sans-serif;
-  --font-body-md: "Inter", sans-serif;
-  --font-body-lg: "Inter", sans-serif;
-  --font-headline-lg: "Inter", sans-serif;
+  --font-label-md: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-headline-lg-mobile: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-headline-md: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-display: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-label-sm: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-body-md: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-body-lg: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-headline-lg: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
 
   --text-label-md: 14px;
   --text-label-md--line-height: 20px;
@@ -283,8 +283,23 @@ code {
 }
 
 @layer base {
+  html {
+    font-family: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    font-family: var(--font-sans);
+    font-family: inherit;
     background-color: var(--color-background-light);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 }
