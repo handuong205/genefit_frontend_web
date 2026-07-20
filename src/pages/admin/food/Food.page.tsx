@@ -290,21 +290,21 @@ const FoodsPage = () => {
               ],
           },
         ]}
-        searchContent={(searchData, setSearchData) => (
-          <div className="flex gap-4 flex-wrap">
-            <FormInput
-              label="Calo"
-              type="number"
-              value={searchData.calories || ""}
-              onChange={(e) =>
-                setSearchData((prev) => ({
-                  ...prev,
-                  calories: e.target.value,
-                }))
-              }
-            />
-          </div>
-        )}
+        // searchContent={(searchData, setSearchData) => (
+        //   <div className="flex gap-4 flex-wrap">
+        //     <FormInput
+        //       label="Calo"
+        //       type="number"
+        //       value={searchData.calories || ""}
+        //       onChange={(e) =>
+        //         setSearchData((prev) => ({
+        //           ...prev,
+        //           calories: e.target.value,
+        //         }))
+        //       }
+        //     />
+        //   </div>
+        // )}
       ></CRUDPageTemplate>
 
       {isFormOpen && (
