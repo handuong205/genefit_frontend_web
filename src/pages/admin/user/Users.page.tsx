@@ -6,8 +6,8 @@ import type { User } from "./models/User.model";
 import { getUsersService, searchUsersService } from "./services/getUsers.service";
 import { deleteUserService } from "./services/deleteUser.service";
 import { toast } from "react-toastify";
-import UserProfileModal from "./models/Users.page.profile";
-import UserEditModal from "./models/Users.modal.edit";
+import UserProfileModal from "../../../components/admin/user/Users.page.profile";
+import UserEditModal from "../../../components/admin/user/Users.modal.edit";
 
 const columns: Column<User>[] = [
   {
@@ -192,6 +192,7 @@ const UsersPage = () => {
       <UserEditModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
+        user={selectedUser}
       />
     </>
   );

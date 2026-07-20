@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import UserEditModal from './Users.modal.edit';
-import { getUserByIdService } from '../services/getUsers.service';
-import { deleteUserService } from '../services/deleteUser.service';
-import type { User as UserModel } from './User.model';
-import { ActionConfirmModal } from '../../../../components/template/ActionConfirmModal';
+import { getUserByIdService } from '../../../pages/admin/user/services/getUsers.service';
+import { deleteUserService } from '../../../pages/admin/user/services/deleteUser.service';
+import type { User as UserModel } from '../../../pages/admin/user/models/User.model';
+import { ActionConfirmModal } from '../../template/ActionConfirmModal';
 import { toast } from 'react-toastify';
 import { X, Eye } from 'lucide-react';
 
@@ -126,9 +126,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, us
                                         <div>
                                             <p className="text-xs text-secondary">Giới tính</p>
                                             <p className="text-body-md font-medium">
-                                                {user?.userProfile?.gender === 'FEMALE' || user?.userProfile?.gender === 'female' ? 'Nữ' : 
-                                                 user?.userProfile?.gender === 'MALE' || user?.userProfile?.gender === 'male' ? 'Nam' : 
-                                                 user?.userProfile?.gender || 'N/A'}
+                                                {user?.userProfile?.gender === 'FEMALE' || user?.userProfile?.gender === 'female' ? 'Nữ' :
+                                                    user?.userProfile?.gender === 'MALE' || user?.userProfile?.gender === 'male' ? 'Nam' :
+                                                        user?.userProfile?.gender || 'N/A'}
                                             </p>
                                         </div>
                                         <div>
@@ -171,10 +171,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, us
                                     <div className="glass-card rounded-xl p-4 border-l-4 border-primary bg-white shadow-sm">
                                         <h4 className="text-label-sm font-bold text-on-surface mb-3">Mục tiêu hiện tại</h4>
                                         <div className="bg-primary-container/20 p-2 rounded text-xs font-medium text-on-primary-container mb-2">
-                                            {user?.userProfile?.goal === 'LOSS_WEIGHT' || user?.userProfile?.goal === 'loss' ? 'Giảm cân' : 
-                                             user?.userProfile?.goal === 'GAIN_MUSCLE' || user?.userProfile?.goal === 'muscle' ? 'Tăng cơ' : 
-                                             user?.userProfile?.goal === 'MAINTAIN_WEIGHT' || user?.userProfile?.goal === 'maintenance' ? 'Duy trì' : 
-                                             user?.userProfile?.goal || 'Chưa thiết lập mục tiêu'}
+                                            {user?.userProfile?.goal === 'LOSS_WEIGHT' || user?.userProfile?.goal === 'loss' ? 'Giảm cân' :
+                                                user?.userProfile?.goal === 'GAIN_MUSCLE' || user?.userProfile?.goal === 'muscle' ? 'Tăng cơ' :
+                                                    user?.userProfile?.goal === 'MAINTAIN_WEIGHT' || user?.userProfile?.goal === 'maintenance' ? 'Duy trì' :
+                                                        user?.userProfile?.goal || 'Chưa thiết lập mục tiêu'}
                                         </div>
                                         <div className="flex justify-between text-xs mb-1">
                                             <span className="text-secondary">Calo mục tiêu</span>
@@ -205,11 +205,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, us
                                         <div>
                                             <p className="text-[10px] text-secondary uppercase">Mức độ hoạt động</p>
                                             <p className="text-sm font-bold">
-                                                {user?.userProfile?.activityLevel === 'SEDENTARY' || user?.userProfile?.activityLevel === 'sedentary' ? 'Ít vận động' : 
-                                                 user?.userProfile?.activityLevel === 'LIGHTLY_ACTIVE' || user?.userProfile?.activityLevel === 'moderate' ? 'Vận động nhẹ' :
-                                                 user?.userProfile?.activityLevel === 'MODERATELY_ACTIVE' || user?.userProfile?.activityLevel === 'active' ? 'Vận động vừa' :
-                                                 user?.userProfile?.activityLevel === 'VERY_ACTIVE' || user?.userProfile?.activityLevel === 'very-active' ? 'Rất năng động' :
-                                                 user?.userProfile?.activityLevel || 'N/A'}
+                                                {user?.userProfile?.activityLevel === 'SEDENTARY' || user?.userProfile?.activityLevel === 'sedentary' ? 'Ít vận động' :
+                                                    user?.userProfile?.activityLevel === 'LIGHTLY_ACTIVE' || user?.userProfile?.activityLevel === 'moderate' ? 'Vận động nhẹ' :
+                                                        user?.userProfile?.activityLevel === 'MODERATELY_ACTIVE' || user?.userProfile?.activityLevel === 'active' ? 'Vận động vừa' :
+                                                            user?.userProfile?.activityLevel === 'VERY_ACTIVE' || user?.userProfile?.activityLevel === 'very-active' ? 'Rất năng động' :
+                                                                user?.userProfile?.activityLevel || 'N/A'}
                                             </p>
                                         </div>
                                     </div>
@@ -220,8 +220,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, us
                                         <div>
                                             <p className="text-[10px] text-secondary uppercase">Bệnh nền</p>
                                             <p className="text-sm font-bold">
-                                                {user?.userProfile?.medicalConditions && user.userProfile.medicalConditions.length > 0 
-                                                    ? user.userProfile.medicalConditions.join(', ') 
+                                                {user?.userProfile?.medicalConditions && user.userProfile.medicalConditions.length > 0
+                                                    ? user.userProfile.medicalConditions.join(', ')
                                                     : 'Không có'}
                                             </p>
                                         </div>
@@ -233,8 +233,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, us
                                         <div>
                                             <p className="text-[10px] text-secondary uppercase">Dị ứng</p>
                                             <p className="text-sm font-bold">
-                                                {user?.userProfile?.allergies && user.userProfile.allergies.length > 0 
-                                                    ? user.userProfile.allergies.join(', ') 
+                                                {user?.userProfile?.allergies && user.userProfile.allergies.length > 0
+                                                    ? user.userProfile.allergies.join(', ')
                                                     : 'Không có'}
                                             </p>
                                         </div>
