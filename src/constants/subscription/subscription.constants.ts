@@ -3,14 +3,10 @@ import type { PlanType, UpdatePlanRequest } from "../../pages/admin/subscription
 
 export const PLAN_TYPES: { value: PlanType; label: string }[] = [
   { value: "FREE", label: "Free" },
-  { value: "WEIGHT_LOSS", label: "Weight Loss" },
-  { value: "WEIGHT_GAIN", label: "Weight Gain" },
-  { value: "MAINTENANCE", label: "Maintenance" },
-  { value: "DIABETES", label: "Diabetes" },
+  { value: "PREMIUM", label: "Premium" },
+  { value: "TRIAL", label: "Trial" },
   { value: "COACH", label: "Coach" },
   { value: "FAMILY", label: "Family" },
-  { value: "PREMIUM", label: "Premium" },
-  { value: "TRIAL_PREMIUM", label: "Trial Premium" },
 ];
 
 export const BOOLEAN_FIELDS: (keyof Pick<

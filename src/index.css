@@ -130,7 +130,7 @@ code {
 }
 
 @theme {
-  --font-sans: 'Arial', 'Helvetica', 'sans-serif';
+  --font-sans: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
 
   /* Existing Colors */
   --color-secondary: #A3B18A;
@@ -187,7 +187,9 @@ code {
   --color-tertiary-container: #82abff;
   --color-surface-variant: #e0e3e5;
   --color-primary-container: #22c55e;
-  --color-primary: #006e2f;
+  --color-primary: #009951;
+  --color-primary-hover: #007a41;
+  --color-accent-soft: #dcfce7;
   --color-on-surface-variant: #3d4a3d;
   --color-outline-variant: #bccbb9;
   --color-on-error-container: #93000a;
@@ -200,14 +202,14 @@ code {
   --spacing-stack-md: 1rem;
   --spacing-container-margin: 1.5rem;
 
-  --font-label-md: "Inter", sans-serif;
-  --font-headline-lg-mobile: "Inter", sans-serif;
-  --font-headline-md: "Inter", sans-serif;
-  --font-display: "Inter", sans-serif;
-  --font-label-sm: "Inter", sans-serif;
-  --font-body-md: "Inter", sans-serif;
-  --font-body-lg: "Inter", sans-serif;
-  --font-headline-lg: "Inter", sans-serif;
+  --font-label-md: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-headline-lg-mobile: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-headline-md: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-display: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-label-sm: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-body-md: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-body-lg: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+  --font-headline-lg: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
 
   --text-label-md: 14px;
   --text-label-md--line-height: 20px;
@@ -238,84 +240,103 @@ code {
   --text-headline-lg--font-weight: 700;
 }
 
+:root {
+  --account-menu-bg: #f5f7fa;
+  --account-menu-text: #111827;
+  --account-menu-muted: #546172;
+  --account-menu-border: rgba(15, 23, 42, 0.08);
+  --account-menu-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  --account-menu-card: rgba(255, 255, 255, 0.86);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --account-menu-bg: #0f172a;
+    --account-menu-text: #f8fafc;
+    --account-menu-muted: #cbd5e1;
+    --account-menu-border: rgba(148, 163, 184, 0.16);
+    --account-menu-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    --account-menu-card: rgba(15, 23, 42, 0.72);
+  }
+}
+
 @layer utilities {
+  .account-menu-surface {
+    background: var(--account-menu-bg);
+    color: var(--account-menu-text);
+    border: 1px solid var(--account-menu-border);
+    box-shadow: var(--account-menu-shadow);
+  }
+
+  .account-menu-card {
+    background: var(--account-menu-card);
+    border: 1px solid var(--account-menu-border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   .shadow-primary {
     box-shadow: 0 4px 14px 0 color-mix(in srgb, var(--color-primary) 25%, transparent);
   }
+
   .shadow-primary-lg {
     box-shadow: 0 10px 25px -3px color-mix(in srgb, var(--color-primary) 35%, transparent);
   }
+
   .ai-glass {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
+
   .gradient-text {
     background-image: linear-gradient(to right, var(--color-primary), var(--color-tertiary));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+
   .glass-card {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
+
   .glass-panel {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
+
   .text-gradient {
     background: linear-gradient(135deg, #006e2f 0%, #22c55e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  .bg-brand-navy { background-color: #0A192F; }
-  .bg-brand-cyan { background-color: #00F0FF; }
-  .text-brand-navy { color: #0A192F; }
-  .text-brand-cyan { color: #00F0FF; }
-  .bg-brand-gradient { background-image: linear-gradient(135deg, #0A192F 0%, #005ac2 50%, #00F0FF 100%); }
-  .bg-button-gradient { background-image: linear-gradient(to right, #005ac2, #00F0FF); }
-  .focus\:ring-brand-cyan:focus { --tw-ring-color: #00F0FF; }
-
-  /* New admin panel styles */
-  .admin-glass-panel {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(0, 240, 255, 0.1);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  }
-  .admin-grid-bg {
-      background-image: 
-          linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
-      background-size: 40px 40px;
-  }
-  .admin-floating-badge {
-      animation: float 6s ease-in-out infinite;
-  }
-  @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-  }
-  .admin-glow-effect {
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-  }
-  .admin-input-glow:focus {
-      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
-      border-color: #00F0FF;
-  }
 }
 
 @layer base {
+  html {
+    font-family: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    font-family: var(--font-sans);
+    font-family: inherit;
     background-color: var(--color-background-light);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 }

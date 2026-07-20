@@ -16,6 +16,18 @@ export const axiosClient = axios.create({
   withCredentials: false,
 });
 
+const attachAuthHeader = (config: InternalAxiosRequestConfig) => {
+  const token = useAuthStore.getState().token;
+
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+};
+
+axiosClient.interceptors.request.use(attachAuthHeader);
+
 // Track if we're currently refreshing token
 let isRefreshing = false;
 // Queue of requests waiting for token refresh
@@ -95,6 +107,8 @@ export const axiosAdminClient = axios.create({
   timeout: 300000,
   withCredentials: false,
 });
+
+axiosAdminClient.interceptors.request.use(attachAuthHeader);
 
 // Track if we're currently refreshing admin token
 let isRefreshingAdmin = false;

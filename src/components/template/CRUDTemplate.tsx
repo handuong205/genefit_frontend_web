@@ -12,6 +12,7 @@ import {
   Trash2,
   Eye,
   RotateCw,
+  Settings,
 } from "lucide-react";
 import CustomSelect from "../common/dropdown/CustomSelect";
 
@@ -58,6 +59,7 @@ export interface CRUDPageTemplateProps<T> {
   canEdit?: (item: T) => boolean;
   onDelete?: (item: T) => void;
   onRestore?: (item: T) => void;
+  onSetting?: (item: T) => void;
   statusField?: keyof T;
   onStatusChange?: (item: T, newStatus: boolean) => void;
 
@@ -130,6 +132,7 @@ export function CRUDPageTemplate<T>({
   canEdit,
   onDelete,
   onRestore,
+  onSetting,
 
   onRowClick,
   selectedRowId,
@@ -515,7 +518,7 @@ export function CRUDPageTemplate<T>({
                   </th>
                 )}
 
-                {(onView || onEdit || onDelete) && (
+                {(onView || onEdit || onSetting || onDelete) && (
                   <th className="w-40 px-4 py-3 text-xs font-semibold text-gray-500 uppercase text-right">
                     Hành động
                   </th>
@@ -621,7 +624,7 @@ export function CRUDPageTemplate<T>({
 
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {!isInactiveOrDeleted && onView && (
+                          {!Boolean((item as any).isDeleted) && onView && (
                             <button
                               title="Xem chi tiết"
                               onClick={() => onView(item)}
@@ -630,9 +633,8 @@ export function CRUDPageTemplate<T>({
                               <Eye className="w-5 h-5" />
                             </button>
                           )}
-                          {/*  */}
 
-                          {!isInactiveOrDeleted &&
+                          {!Boolean((item as any).isDeleted) &&
                             onEdit &&
                             (!canEdit || canEdit(item)) && (
                               <button
@@ -647,6 +649,16 @@ export function CRUDPageTemplate<T>({
                               </button>
                             )}
 
+                          {!Boolean((item as any).isDeleted) && onSetting && (
+                            <button
+                              title="Cài đặt"
+                              onClick={() => onSetting(item)}
+                              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition active:scale-90 cursor-pointer"
+                            >
+                              <Settings className="w-5 h-5" />
+                            </button>
+                          )}
+
                           {!isInactiveOrDeleted && onDelete && (
                             <button
                               title="Xóa"
@@ -657,7 +669,7 @@ export function CRUDPageTemplate<T>({
                             </button>
                           )}
 
-                          {isInactiveOrDeleted && onRestore && (
+                          {(Boolean((item as any).isDeleted) || (item as any).isActive === false) && onRestore && (
                             <button
                               title="Khôi phục"
                               onClick={() => handleRestore(item)}

@@ -4,10 +4,15 @@ import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute = () => {
     const user = useAuthStore((state) => state.user);
-    
+    const token = useAuthStore((state) => state.token);
+    const scope = String(user?.scope ?? user?.role ?? "").toUpperCase();
 
-    if (!user) {
-        <Outlet />
+    if (!token || !user) {
+        return <Navigate to={AUTH_ROUTE.ADMIN_LOGIN} replace />;
+    }
+
+    if (!scope.includes("ADMIN")) {
+        return <Navigate to={AUTH_ROUTE.ADMIN_LOGIN} replace />;
     }
   return (
     <Outlet />
